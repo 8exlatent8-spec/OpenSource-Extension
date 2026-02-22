@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="iconExtension.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CC Helper Extension</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── CSS VARIABLES ── */
+    :root {
+      --sky:    #5BC8F5;
+      --sky2:   #87DFFF;
+      --grass:  #5CC85B;
+      --grass2: #3DA83C;
+      --dirt:   #A0724A;
+      --dirt2:  #7A5535;
+      --stone:  #8FA3B1;
+      --sun:    #FFD84D;
+      --orange: #FF8C42;
+      --white:  #FAFFF8;
+      --dark:   #1C2B1A;
+      --shadow: rgba(0,0,0,0.25);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--sky);
+      color: var(--dark);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── PIXEL FONT HELPER ── */
+    .pixel { font-family: 'Fredoka One', cursive; letter-spacing: 0.02em; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--sky); }
+    ::-webkit-scrollbar-thumb { background: var(--grass2); border-radius: 6px; border: 2px solid var(--sky); }
+
+    /* ══════════════════════════
+       ANIMATED SKY BACKGROUND
+    ══════════════════════════ */
+    .sky-bg {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, #2A9FD6 0%, #5BC8F5 45%, #A8E6FF 100%);
+      z-index: -3;
+    }
+
+    /* Clouds */
+    .cloud {
+      position: fixed;
+      background: #fff;
+      border-radius: 50px;
+      opacity: 0.82;
+      z-index: -2;
+      animation: driftCloud linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+    }
+    .cloud:nth-child(1)  { width:140px; height:38px; top:8%;  animation-duration:38s; animation-delay:-5s; }
+    .cloud:nth-child(2)  { width:80px;  height:24px; top:17%; animation-duration:52s; animation-delay:-20s; }
+    .cloud:nth-child(3)  { width:200px; height:52px; top:6%;  animation-duration:60s; animation-delay:-35s; }
+    .cloud:nth-child(4)  { width:110px; height:30px; top:22%; animation-duration:45s; animation-delay:-12s; }
+    .cloud:nth-child(5)  { width:160px; height:42px; top:3%;  animation-duration:72s; animation-delay:-50s; }
+    .cloud:nth-child(1)::before  { width:60px; height:60px; top:-30px; left:20px; }
+    .cloud:nth-child(1)::after   { width:40px; height:40px; top:-20px; right:25px; }
+    .cloud:nth-child(2)::before  { width:40px; height:40px; top:-20px; left:12px; }
+    .cloud:nth-child(2)::after   { width:28px; height:28px; top:-12px; right:18px; }
+    .cloud:nth-child(3)::before  { width:80px; height:80px; top:-44px; left:30px; }
+    .cloud:nth-child(3)::after   { width:60px; height:60px; top:-30px; right:40px; }
+    .cloud:nth-child(4)::before  { width:50px; height:50px; top:-26px; left:18px; }
+    .cloud:nth-child(4)::after   { width:36px; height:36px; top:-18px; right:22px; }
+    .cloud:nth-child(5)::before  { width:70px; height:70px; top:-38px; left:25px; }
+    .cloud:nth-child(5)::after   { width:50px; height:50px; top:-26px; right:35px; }
+
+    @keyframes driftCloud {
+      from { transform: translateX(-320px); }
+      to   { transform: translateX(110vw);  }
+    }
+
+    /* ── SUN ── */
+    .sun {
+      position: fixed;
+      top: 32px;
+      right: 80px;
+      width: 72px;
+      height: 72px;
+      background: var(--sun);
+      border-radius: 50%;
+      box-shadow: 0 0 0 12px rgba(255,216,77,0.25), 0 0 0 24px rgba(255,216,77,0.12);
+      z-index: -1;
+      animation: sunPulse 4s ease-in-out infinite;
+    }
+    @keyframes sunPulse {
+      0%,100% { box-shadow: 0 0 0 12px rgba(255,216,77,0.25), 0 0 0 24px rgba(255,216,77,0.12); }
+      50%      { box-shadow: 0 0 0 18px rgba(255,216,77,0.30), 0 0 0 36px rgba(255,216,77,0.15); }
+    }
+
+    /* ══════════════════════════
+       GROUND STRIP
+    ══════════════════════════ */
+    .ground-strip {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* pixel grass */
+    .grass-strip {
+      height: 32px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--grass) 0px, var(--grass) 16px,
+        var(--grass2) 16px, var(--grass2) 32px
+      );
+      image-rendering: pixelated;
+      border-top: 4px solid #7ADA79;
+    }
+    .dirt-strip {
+      height: 20px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--dirt) 0px, var(--dirt) 16px,
+        var(--dirt2) 16px, var(--dirt2) 32px
+      );
+    }
+
+    /* ══════════════════════════
+       NAVIGATION
+    ══════════════════════════ */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(28, 43, 26, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 3px solid var(--grass2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    /* Tiny block logo */
+    .block-logo {
+      width: 36px;
+      height: 36px;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3,12px);
+      grid-template-rows: repeat(3,12px);
+      gap: 0;
+      transform: rotate(-15deg);
+    }
+    .block-logo span {
+      display: block;
+    }
+    .bl-1 { background: #5CC85B; }
+    .bl-2 { background: #3DA83C; }
+    .bl-3 { background: #7ADA79; }
+    .bl-4 { background: #A0724A; }
+    .bl-5 { background: #7A5535; }
+    .bl-6 { background: #C49060; }
+    .bl-7 { background: #8FA3B1; }
+    .bl-8 { background: #6A8898; }
+    .bl-9 { background: #B0C4D0; }
+
+    .nav-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.35rem;
+      color: var(--white);
+      letter-spacing: 0.03em;
+    }
+    .nav-title span { color: var(--sun); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: rgba(250,255,248,0.75);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--sun); }
+
+    /* ══════════════════════════
+       HERO
+    ══════════════════════════ */
+    .hero {
+      min-height: 86vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 0;
+      position: relative;
+      text-align: center;
+    }
+
+    /* Floating blocks decoration */
+    .floating-block {
+      position: absolute;
+      border-radius: 4px;
+      animation: floatBlock ease-in-out infinite alternate;
+      opacity: 0.75;
+    }
+    @keyframes floatBlock {
+      from { transform: translateY(0) rotate(0deg); }
+      to   { transform: translateY(-18px) rotate(8deg); }
+    }
+    .fb1 { width:48px; height:48px; background:var(--grass);  top:18%; left:8%;  animation-duration:3.2s; animation-delay:0s;   border: 3px solid var(--grass2); }
+    .fb2 { width:32px; height:32px; background:var(--dirt);   top:35%; left:14%; animation-duration:4.1s; animation-delay:0.5s; border: 3px solid var(--dirt2); }
+    .fb3 { width:56px; height:56px; background:var(--stone);  top:14%; right:9%; animation-duration:2.8s; animation-delay:1s;   border: 3px solid #6A8898; }
+    .fb4 { width:36px; height:36px; background:var(--sun);    top:42%; right:12%;animation-duration:3.7s; animation-delay:0.3s; border: 3px solid var(--orange); }
+    .fb5 { width:28px; height:28px; background:#FF6B8A;       top:60%; left:6%;  animation-duration:4.5s; animation-delay:1.2s; border: 3px solid #CC3355; }
+    .fb6 { width:42px; height:42px; background:#B06FFF;       top:55%; right:7%; animation-duration:3.0s; animation-delay:0.8s; border: 3px solid #7C3FCC; }
+
+    /* Hero badge */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.18);
+      border: 2px solid rgba(255,255,255,0.45);
+      backdrop-filter: blur(6px);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeSlideDown 0.8s ease both;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: #4DFF91;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.5); }
+    }
+
+    /* Hero heading */
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      line-height: 1.05;
+      color: var(--white);
+      text-shadow: 4px 4px 0px rgba(0,0,0,0.35), 0 0 40px rgba(255,255,255,0.15);
+      margin-bottom: 12px;
+      animation: fadeSlideDown 0.9s 0.1s ease both;
+    }
+    .hero h1 .accent { color: var(--sun); }
+    .hero h1 .accent2 { color: #BCFFB8; }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: rgba(250,255,248,0.82);
+      max-width: 540px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+      animation: fadeSlideDown 1s 0.2s ease both;
+    }
+
+    /* CTA Buttons */
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeSlideDown 1.1s 0.3s ease both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem;
+      letter-spacing: 0.04em;
+      padding: 16px 36px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.2s;
+    }
+    .btn:hover::after { background: rgba(255,255,255,0.1); }
+    .btn:active { transform: scale(0.97) translateY(2px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #5CC85B, #3DA83C);
+      color: #fff;
+      box-shadow: 0 6px 0 #2A7029, 0 8px 24px rgba(60,168,60,0.4);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #2A7029, 0 12px 30px rgba(60,168,60,0.5); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      border: 2px solid rgba(255,255,255,0.5);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    }
+    .btn-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,0.22); }
+
+    /* ── Download icon svg ── */
+    .btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    /* Hero island */
+    .hero-island {
+      margin-top: 60px;
+      position: relative;
+      animation: fadeSlideUp 1s 0.4s ease both;
+    }
+
+    /* Pixel art "Cubie" character made with divs */
+    .cubie-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      align-items: flex-end;
+    }
+
+    .cubie {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      animation: cubieBob 2.5s ease-in-out infinite;
+    }
+    .cubie:nth-child(2) { animation-delay: 0.6s; }
+    .cubie:nth-child(3) { animation-delay: 1.2s; }
+    @keyframes cubieBob {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    .cubie-head {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      position: relative;
+    }
+    .cubie-head::before { /* eyes */
+      content: '• •';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10px;
+      color: #1C2B1A;
+      font-weight: 900;
+      letter-spacing: 6px;
+      line-height: 1;
+    }
+    .cubie-body {
+      width: 48px;
+      height: 36px;
+      border-radius: 4px;
+    }
+    .cubie-legs {
+      display: flex;
+      gap: 4px;
+    }
+    .cubie-leg {
+      width: 18px;
+      height: 24px;
+      border-radius: 3px 3px 6px 6px;
+    }
+
+    /* Cubie skin colors */
+    .cubie-1 .cubie-head  { background: #FFDDB0; border: 3px solid #C9954A; }
+    .cubie-1 .cubie-body  { background: #5CC85B; border: 3px solid #3DA83C; }
+    .cubie-1 .cubie-leg   { background: #4A7CFF; border: 3px solid #2A54CC; }
+
+    .cubie-2 .cubie-head  { background: #FFB8B8; border: 3px solid #CC5555; }
+    .cubie-2 .cubie-body  { background: #FF8C42; border: 3px solid #CC5500; }
+    .cubie-2 .cubie-leg   { background: #8FA3B1; border: 3px solid #4A6A7A; }
+
+    .cubie-3 .cubie-head  { background: #B8E4FF; border: 3px solid #4A99CC; }
+    .cubie-3 .cubie-body  { background: #B06FFF; border: 3px solid #7040BB; }
+    .cubie-3 .cubie-leg   { background: #5CC85B; border: 3px solid #3DA83C; }
+
+    /* ══════════════════════════
+       SECTION WRAPPER
+    ══════════════════════════ */
+    .section-wrap {
+      background: linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.06) 100%);
+    }
+
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sun);
+      background: rgba(0,0,0,0.25);
+      padding: 4px 14px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255,216,77,0.4);
+    }
+
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      color: var(--white);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+      margin-bottom: 14px;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: rgba(250,255,248,0.78);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    /* ══════════════════════════
+       FEATURES GRID
+    ══════════════════════════ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 28px 24px;
+  backdrop-filter: blur(10px);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+.feature-card p {
+  font-size: 0.9rem;
+  color: rgba(250,255,248,0.88);
+  line-height: 1.6;
+}
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+      background: var(--card-accent, var(--grass));
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    }
+
+    .feature-card h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: rgba(250,255,248,0.72);
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════════
+       DOWNLOAD SECTION
+    ══════════════════════════ */
+    #download {
+      text-align: center;
+    }
+
+    .download-card {
+      background: rgba(28,43,26,0.65);
+      border: 2px solid rgba(92,200,91,0.4);
+      border-radius: 24px;
+      padding: 60px 40px;
+      backdrop-filter: blur(14px);
+      position: relative;
+      overflow: hidden;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .download-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(92,200,91,0.18) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .download-card::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 26px;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(92,200,91,0.5) 0px, rgba(92,200,91,0.5) 6px,
+        transparent 6px, transparent 12px
+      );
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    .download-icon-wrap {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, var(--grass), var(--grass2));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      box-shadow: 0 8px 0 var(--dirt2), 0 12px 32px rgba(92,200,91,0.4);
+      font-size: 2.5rem;
+      animation: downloadIconBounce 3s ease-in-out infinite;
+    }
+    @keyframes downloadIconBounce {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-8px) rotate(-5deg); }
+    }
+
+    .download-card h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem;
+      color: var(--white);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+      margin-bottom: 12px;
+    }
+
+    .download-card p {
+      color: rgba(250,255,248,0.72);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 32px;
+      max-width: 460px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(250,255,248,0.55);
+      margin-top: 20px;
+    }
+    .version-badge::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--grass);
+      border-radius: 50%;
+    }
+
+    /* ── Progress bar ── */
+    .dl-progress-wrap {
+      display: none;
+      margin-top: 20px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .dl-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--grass2), var(--grass), #BCFFB8);
+      background-size: 200% 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.08s linear;
+      animation: shimmer 1s linear infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Download complete bar — green solid, no shimmer */
+    .dl-progress-bar.complete {
+      animation: none;
+      background: linear-gradient(90deg, #3DA83C, #BCFFB8);
+      transition: width 0.3s ease;
+    }
+
+    /* Download complete label */
+    .dl-complete-label {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      color: #BCFFB8;
+      animation: fadeSlideDown 0.5s ease both;
+    }
+    .dl-complete-label.show { display: flex; }
+
+    /* ══════════════════════════
+       HOW TO INSTALL
+    ══════════════════════════ */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      counter-reset: step-counter;
+    }
+
+    .step-card {
+      background: rgba(0,0,0,0.2);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 24px 20px;
+      position: relative;
+      counter-increment: step-counter;
+      transition: transform 0.2s;
+    }
+    .step-card:hover { transform: translateY(-4px); }
+    .step-card::before {
+      content: counter(step-counter);
+      position: absolute;
+      top: -16px;
+      left: 20px;
+      width: 32px;
+      height: 32px;
+      background: var(--sun);
+      color: var(--dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      box-shadow: 0 3px 0 var(--orange);
+    }
+
+    .step-card h4 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.05rem;
+      color: var(--white);
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    .step-card p {
+      font-size: 0.87rem;
+      color: rgba(250,255,248,0.68);
+      line-height: 1.6;
+    }
+    .step-card code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: #BCFFB8;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ══════════════════════════
+       OPEN-SOURCE SECTION
+    ══════════════════════════ */
+    .source-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* File tree panel */
+    .file-tree {
+      background: rgba(0,0,0,0.35);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      user-select: none;
+      height: 560px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-tree-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .file-tree-scroll::-webkit-scrollbar { width: 6px; }
+    .file-tree-scroll::-webkit-scrollbar-track { background: transparent; }
+    .file-tree-scroll::-webkit-scrollbar-thumb { background: rgba(92,200,91,0.3); border-radius: 3px; }
+
+    .file-tree-header {
+      padding: 14px 16px;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 2px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .file-tree-header span {
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.85rem;
+      color: rgba(250,255,248,0.6);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .tree-dot { width:10px; height:10px; border-radius:50%; }
+    .td-red   { background:#FF5F57; }
+    .td-yel   { background:#FEBC2E; }
+    .td-grn   { background:#28C840; }
+
+    .tree-folder {
+      padding: 10px 16px 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: rgba(250,255,248,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .tree-folder-icon { font-size: 0.9rem; }
+
+    .tree-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px 9px 32px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent;
+      position: relative;
+    }
+    .tree-file:hover { background: rgba(255,255,255,0.06); }
+    .tree-file.active {
+      background: rgba(92,200,91,0.12);
+      border-left-color: var(--grass);
+    }
+    .tree-file-icon {
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .tree-file-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: rgba(250,255,248,0.82);
+      font-family: 'Courier New', monospace;
+    }
+    .tree-file.active .tree-file-name { color: #BCFFB8; }
+    .tree-file-badge {
+      margin-left: auto;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+    .badge-js  { background: rgba(255,216,77,0.2); color: var(--sun); border: 1px solid rgba(255,216,77,0.4); }
+    .badge-json{ background: rgba(74,124,255,0.2); color: #8AAEFF; border: 1px solid rgba(74,124,255,0.4); }
+
+    /* Code preview panel */
+    .code-panel {
+      background: rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      height: 560px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-panel-header {
+      padding: 14px 20px;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 2px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .code-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: rgba(250,255,248,0.75);
+    }
+    .code-panel-title .file-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--grass);
+      animation: pulse 2s infinite;
+    }
+
+    .code-panel-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .code-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: rgba(250,255,248,0.7);
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+    .code-action-btn:hover { background: rgba(92,200,91,0.2); color: #BCFFB8; border-color: var(--grass2); }
+
+    .code-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .code-body-inner {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    .code-body-inner::-webkit-scrollbar { width: 8px; height: 8px; }
+    .code-body-inner::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    .code-body-inner::-webkit-scrollbar-thumb { background: rgba(92,200,91,0.4); border-radius: 4px; }
+    .code-body-inner::-webkit-scrollbar-thumb:hover { background: rgba(92,200,91,0.7); }
+    .code-body-inner::-webkit-scrollbar-corner { background: transparent; }
+
+    .code-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      color: rgba(250,255,248,0.3);
+      gap: 12px;
+      text-align: center;
+    }
+    .code-empty .empty-icon { font-size: 3rem; opacity: 0.4; }
+    .code-empty p { font-size: 0.9rem; font-weight: 600; }
+
+    .code-display {
+      display: none;
+      width: 100%;
+    }
+    .code-display.visible { display: flex; }
+
+    .line-numbers {
+      padding: 20px 0;
+      min-width: 48px;
+      text-align: right;
+      background: rgba(0,0,0,0.2);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .line-numbers span {
+      display: block;
+      padding: 0 12px;
+      font-size: 0.78rem;
+      font-family: 'Courier New', monospace;
+      color: rgba(250,255,248,0.2);
+      line-height: 1.6;
+    }
+
+    .code-content {
+      flex: 1;
+      padding: 20px 20px 20px 16px;
+      overflow-x: auto;
+    }
+    .code-content pre {
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #D4E8D0;
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    /* Syntax highlight */
+    .t-kw   { color: #B06FFF; }
+    .t-str  { color: #BCFFB8; }
+    .t-num  { color: var(--sun); }
+    .t-cmt  { color: rgba(250,255,248,0.3); font-style: italic; }
+    .t-fn   { color: #87DFFF; }
+    .t-key  { color: #FF8C42; }
+
+    /* Loading spinner */
+    .code-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      gap: 14px;
+    }
+    .code-loading.visible { display: flex; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--grass);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .code-loading p { font-size: 0.85rem; color: rgba(250,255,248,0.4); font-weight: 600; }
+
+    /* Error state */
+    .code-error {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      gap: 10px;
+      text-align: center;
+      padding: 24px;
+    }
+    .code-error.visible { display: flex; }
+    .code-error .err-icon { font-size: 2rem; }
+    .code-error p { font-size: 0.88rem; color: rgba(250,255,248,0.5); font-weight: 600; line-height: 1.6; }
+    .code-error small { font-size: 0.78rem; color: rgba(250,255,248,0.25); font-family: 'Courier New', monospace; }
+
+    @media (max-width: 820px) {
+      .source-layout { grid-template-columns: 1fr; }
+      .file-tree { height: 260px; }
+      .code-panel { height: 480px; }
+    }
+
+    /* ══════════════════════════
+       RESPONSIVE
+    ══════════════════════════ */
+    @media (max-width: 640px) {
+      nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .floating-block { display: none; }
+      .hero { padding: 40px 16px 0; }
+      .download-card { padding: 40px 20px; }
+      .cubie-wrap { gap: 16px; }
+      .cubie-head { width: 30px; height: 30px; }
+      .cubie-body { width: 36px; height: 28px; }
+      .cubie-leg  { width: 13px; height: 18px; }
+    }
+
+    /* ══════════════════════════
+       ANIMATIONS
+    ══════════════════════════ */
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ══════════════════════════
+       TOAST NOTIFICATION
+    ══════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--dark);
+      color: var(--white);
+      border: 2px solid var(--grass2);
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-icon { font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+
+  <!-- SKY BACKGROUND -->
+  <div class="sky-bg"></div>
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+  <div class="sun"></div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toast-icon">⬇️</span>
+    <span id="toast-msg">Starting download...</span>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <div class="block-logo">
+        <span class="bl-1"></span><span class="bl-2"></span><span class="bl-3"></span>
+        <span class="bl-4"></span><span class="bl-5"></span><span class="bl-6"></span>
+        <span class="bl-7"></span><span class="bl-8"></span><span class="bl-9"></span>
+      </div>
+      <span class="nav-title">CC <span>Helper</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#download">Download</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#source">Open-Source</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="floating-block fb1"></div>
+    <div class="floating-block fb2"></div>
+    <div class="floating-block fb3"></div>
+    <div class="floating-block fb4"></div>
+    <div class="floating-block fb5"></div>
+    <div class="floating-block fb6"></div>
+
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      New Update Available <b>8.0v</b>
+    </div>
+
+    <h1 class="pixel">
+      Level Up Your<br/>
+      <span class="accent">Cubic Castles</span><br/>
+      <span class="accent2">Experience</span>
+    </h1>
+
+    <p class="hero-sub">
+      The ultimate browser extension for Cubic Castles players. New features, quality-of-life improvements, and powerful tools — right in your browser.
+    </p>
+
+    <div class="cta-group">
+      <a href="#install" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+          <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/>
+        </svg>
+        How to Install
+      </a>
+      <a href="#features" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Features
+      </a>
+    </div>
+
+    <div class="hero-island">
+      <div class="cubie-wrap">
+        <div class="cubie cubie-1">
+          <div class="cubie-head"></div>
+          <div class="cubie-body"></div>
+          <div class="cubie-legs">
+            <div class="cubie-leg"></div>
+            <div class="cubie-leg"></div>
+          </div>
+        </div>
+        <div class="cubie cubie-2">
+          <div class="cubie-head"></div>
+          <div class="cubie-body"></div>
+          <div class="cubie-legs">
+            <div class="cubie-leg"></div>
+            <div class="cubie-leg"></div>
+          </div>
+        </div>
+        <div class="cubie cubie-3">
+          <div class="cubie-head"></div>
+          <div class="cubie-body"></div>
+          <div class="cubie-legs">
+            <div class="cubie-leg"></div>
+            <div class="cubie-leg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRASS GROUND -->
+  <div class="ground-strip">
+    <div class="grass-strip"></div>
+    <div class="dirt-strip"></div>
+  </div>
+
+  <!-- FEATURES SECTION -->
+  <div class="section-wrap">
+    <section id="features">
+      <div class="section-tag reveal">✦ What's Included</div>
+      <h2 class="section-title reveal">Packed With Features</h2>
+      <p class="section-desc reveal">Everything you need to dominate the world of Cubic Castles, right at your fingertips.</p>
+
+      <div class="features-grid">
+        <div class="feature-card reveal" style="--card-accent: #4A7CFF;">
+          <div class="feature-icon">💬</div>
+          <h3>Live Chat</h3>
+          <p>Talk with other Cubic Castles players across any realm in real time — your community is always just one click away, no matter where you are in Eden.</p>
+        </div>
+        <div class="feature-card reveal" style="--card-accent: #FFD84D;">
+          <div class="feature-icon">💰</div>
+          <h3>Instant Price Checker</h3>
+          <p>Look up item prices fast with zero load time. No more waiting, no more tabs — get accurate market values instantly and trade smarter.</p>
+        </div>
+        <div class="feature-card reveal" style="--card-accent: #5CC85B;">
+          <div class="feature-icon">⚒️</div>
+          <h3>Crafting Hub</h3>
+          <p>Every crafting recipe in one place, plus a built-in crafting calculator. Figure out exactly what materials you need before you ever open your workbench.</p>
+        </div>
+        <div class="feature-card reveal" style="--card-accent: #FF8C42;">
+          <div class="feature-icon">⏱️</div>
+          <h3>Plot Timer</h3>
+          <p>Never forget about your Pen Plot! Set in-game timers that remind you exactly when your Pen Yard plots are ready to re-rent.</p>
+        </div>
+        <div class="feature-card reveal" style="--card-accent: #B06FFF;">
+          <div class="feature-icon">🎮</div>
+          <h3>Mini Games</h3>
+          <p>Bored between sessions? Challenge other players to Chess, Yahtzee, or 8 Ball Pool — all built right into the extension. Good luck!</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- GROUND DIVIDER -->
+  <div class="ground-strip">
+    <div class="grass-strip"></div>
+    <div class="dirt-strip"></div>
+  </div>
+
+  <!-- INSTALL + DOWNLOAD SECTION -->
+  <div class="section-wrap">
+    <section id="install">
+      <div class="section-tag reveal">⚙ How To Install</div>
+      <h2 class="section-title reveal">Up &amp; Running in 4 Steps</h2>
+      <p class="section-desc reveal">No technical skills required. Follow these simple steps and you'll be playing with the extension in under a minute.</p>
+
+      <div class="steps-grid" style="margin-bottom: 64px;">
+        <div class="step-card reveal">
+          <h4>Download the File</h4>
+          <p>Click the Download button below to get the <code>CCHelper.zip</code> file onto your computer.</p>
+        </div>
+        <div class="step-card reveal">
+          <h4>Unzip the Folder</h4>
+          <p>Right-click <code>CCHelper.zip</code> and choose <code>Extract All</code> to unpack the extension folder.</p>
+        </div>
+        <div class="step-card reveal">
+          <h4>Open Extensions</h4>
+          <p>In Chrome or Edge, go to <code>chrome://extensions</code> and enable <code>Developer Mode</code> in the top-right corner.</p>
+        </div>
+        <div class="step-card reveal">
+          <h4>Load Unpacked</h4>
+          <p>Click <code>Load unpacked</code>, select the unzipped <code>CCHelper</code> folder, and you're done! 🎉</p>
+        </div>
+      </div>
+
+      <div id="download">
+        <div class="download-card reveal">
+          <div class="download-icon-wrap" id="dl-icon-wrap">📦</div>
+          <h2 class="pixel">Download Extension</h2>
+          <p>
+            Works with Chrome, Edge, and Brave. Free forever — no account needed.
+          </p>
+
+          <a href="CCHelper.zip" class="btn btn-primary" id="dl-btn" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download CCHelper
+          </a>
+
+          <div class="dl-progress-wrap" id="dl-progress-wrap">
+            <div class="dl-progress-bar" id="dl-progress-bar"></div>
+          </div>
+
+          <!-- Download Complete label -->
+          <div class="dl-complete-label" id="dl-complete-label">
+            ✅ Download Complete!
+          </div>
+
+          <div class="version-badge">v8.0.0 · Free Forever · No Account Needed</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- GROUND DIVIDER -->
+  <div class="ground-strip">
+    <div class="grass-strip"></div>
+    <div class="dirt-strip"></div>
+  </div>
+
+  <!-- OPEN-SOURCE SECTION -->
+  <div class="section-wrap">
+    <section id="source">
+      <div class="section-tag reveal">🔓 Open-Source</div>
+      <h2 class="section-title reveal">Inspect the Code</h2>
+      <p class="section-desc reveal">CCHelper is fully open-source. Click any file below to read it directly in your browser — no downloads required.</p>
+
+      <div class="source-layout reveal">
+        <!-- File Tree -->
+        <div class="file-tree">
+          <div class="file-tree-header">
+            <span class="tree-dot td-red"></span>
+            <span class="tree-dot td-yel"></span>
+            <span class="tree-dot td-grn"></span>
+            <span style="margin-left:6px;">CCHelper</span>
+          </div>
+          <div class="file-tree-scroll">
+            <div class="tree-folder">
+              <span class="tree-folder-icon">📁</span> icons
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/icons/icon16.png','icon16.png','img')" data-file="icon16.png">
+              <span class="tree-file-icon">🖼️</span>
+              <span class="tree-file-name">icon16.png</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/icons/icon32.png','icon32.png','img')" data-file="icon32.png">
+              <span class="tree-file-icon">🖼️</span>
+              <span class="tree-file-name">icon32.png</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/icons/icon48.png','icon48.png','img')" data-file="icon48.png">
+              <span class="tree-file-icon">🖼️</span>
+              <span class="tree-file-name">icon48.png</span>
+            </div>
+
+            <div class="tree-folder" style="margin-top:6px;">
+              <span class="tree-folder-icon">📄</span> scripts
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/content.js','content.js','js')" data-file="content.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">content.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/engine-chat.js','engine-chat.js','js')" data-file="engine-chat.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">engine-chat.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/engine-core.js','engine-core.js','js')" data-file="engine-core.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">engine-core.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/engine-games.js','engine-games.js','js')" data-file="engine-games.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">engine-games.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/engine-prices.js','engine-prices.js','js')" data-file="engine-prices.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">engine-prices.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/engine-craft.js','engine-craft.js','js')" data-file="engine-craft.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">engine-craft.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/engine-timer.js','engine-timer.js','js')" data-file="engine-timer.js">
+              <span class="tree-file-icon">📜</span>
+              <span class="tree-file-name">engine-timer.js</span>
+              <span class="tree-file-badge badge-js">JS</span>
+            </div>
+            <div class="tree-file" onclick="loadFile('CCHelper/manifest.json','manifest.json','json')" data-file="manifest.json">
+              <span class="tree-file-icon">⚙️</span>
+              <span class="tree-file-name">manifest.json</span>
+              <span class="tree-file-badge badge-json">JSON</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Panel -->
+        <div class="code-panel">
+          <div class="code-panel-header">
+            <div class="code-panel-title">
+              <span class="file-dot"></span>
+              <span id="code-panel-filename">Select a file to view</span>
+            </div>
+            <div class="code-panel-actions">
+              <button class="code-action-btn" id="copy-btn" onclick="copyCode()" style="display:none;">
+                📋 Copy
+              </button>
+              <a class="code-action-btn" id="raw-btn" style="display:none; text-decoration:none;" target="_blank">
+                🔗 Raw
+              </a>
+            </div>
+          </div>
+
+          <div class="code-body">
+            <div class="code-body-inner">
+              <!-- Empty state -->
+              <div class="code-empty" id="code-empty">
+                <div class="empty-icon">📂</div>
+                <p>Click a file in the explorer to view its source code</p>
+              </div>
+
+              <!-- Loading state -->
+              <div class="code-loading" id="code-loading">
+                <div class="spinner"></div>
+                <p>Loading file...</p>
+              </div>
+
+              <!-- Error state -->
+              <div class="code-error" id="code-error">
+                <span class="err-icon">⚠️</span>
+                <p id="code-error-msg">Could not load this file.<br><span style="font-size:0.8rem;opacity:0.6;">Make sure the site is served from a local web server (not opened as a file://) and the CCHelper folder is in the same directory as index.html.</span></p>
+                <small id="code-error-path"></small>
+              </div>
+
+              <!-- Image preview -->
+              <div id="img-preview" style="display:none; padding:32px; text-align:center;">
+                <img id="preview-img" src="" alt="" style="max-width:100%; border-radius:8px; image-rendering:pixelated;" />
+                <p style="margin-top:12px; font-size:0.8rem; color:rgba(250,255,248,0.4);">Image preview</p>
+              </div>
+
+              <!-- Code display -->
+              <div class="code-display" id="code-display">
+                <div class="line-numbers" id="line-numbers"></div>
+                <div class="code-content">
+                  <pre id="code-pre"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="text-align:center; padding: 40px 24px 48px; background: rgba(0,0,0,0.25); border-top: 2px solid rgba(255,255,255,0.08); color: rgba(250,255,248,0.5); font-size:0.85rem;">
+  <div style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:rgba(250,255,248,0.75); margin-bottom:8px;">CC <span style="color:var(--sun);">Helper</span></div>
+  <p>Fan-made tool for the Cubic Castles community. Not affiliated with Cosmic Cow LLC.</p>
+</footer>
+
+  <script>
+    /* ── REVEAL ON SCROLL ── */
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          const parent = e.target.parentElement;
+          const siblings = [...parent.querySelectorAll('.reveal')];
+          siblings.forEach((el, i) => {
+            if (!el.classList.contains('visible')) {
+              setTimeout(() => el.classList.add('visible'), i * 80);
+            }
+          });
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    /* ── TOAST ── */
+    let toastTimer = null;
+    function showToast(msg, icon = '⬇️', duration = 3500) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    /* ── DOWNLOAD WITH REAL COMPLETION ── */
+    let dlDone = false;
+
+    function animateProgress(onComplete) {
+      const wrap = document.getElementById('dl-progress-wrap');
+      const bar  = document.getElementById('dl-progress-bar');
+      wrap.style.display = 'block';
+      bar.classList.remove('complete');
+      bar.style.width = '0%';
+
+      let w = 0;
+      // Ramp up fast to ~85%, then slow — simulates real download
+      const interval = setInterval(() => {
+        if (w < 70)       w += Math.random() * 14 + 6;
+        else if (w < 90)  w += Math.random() * 3 + 1;
+        else              w += 0.4;
+
+        if (w >= 99) {
+          w = 99;
+          clearInterval(interval);
+          // Small pause at 99% then snap to 100% = "complete"
+          setTimeout(() => {
+            bar.classList.add('complete');
+            bar.style.width = '100%';
+            setTimeout(onComplete, 350);
+          }, 400);
+        }
+        bar.style.width = w + '%';
+      }, 80);
+    }
+
+    document.getElementById('dl-btn').addEventListener('click', function () {
+      if (dlDone) return; // prevent double-fire
+
+      showToast('Downloading CCHelper... 📦', '⬇️', 6000);
+
+      animateProgress(() => {
+        dlDone = true;
+        // Show the complete label
+        const label = document.getElementById('dl-complete-label');
+        label.classList.add('show');
+        // Update the download icon to a checkmark
+        document.getElementById('dl-icon-wrap').textContent = '✅';
+        // Update toast
+        showToast('Download complete! 🎉', '✅', 4000);
+        // Change button text
+        const btn = document.getElementById('dl-btn');
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Downloaded!`;
+        btn.style.background = 'linear-gradient(135deg, #3DA83C, #2A7029)';
+        btn.style.pointerEvents = 'none';
+      });
+    });
+
+    /* ── CLOUD STAGGER ── */
+    document.querySelectorAll('.cloud').forEach((c) => {
+      c.style.left = (Math.random() * 80 - 10) + 'vw';
+    });
+
+    /* ── NAV SCROLL ACTIVE ── */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    window.addEventListener('scroll', () => {
+      let cur = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 80) cur = s.id;
+      });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + cur
+          ? 'var(--sun)'
+          : 'rgba(250,255,248,0.75)';
+      });
+    });
+
+    /* ══════════════════════════════════════════
+       OPEN-SOURCE FILE VIEWER
+       Fetches real files from the CCHelper folder
+    ══════════════════════════════════════════ */
+    let currentCode = '';
+
+    async function loadFile(path, name, type) {
+      // Mark active tree item
+      document.querySelectorAll('.tree-file').forEach(f => f.classList.remove('active'));
+      const clicked = [...document.querySelectorAll('.tree-file')].find(f => f.dataset.file === name);
+      if (clicked) clicked.classList.add('active');
+
+      document.getElementById('code-panel-filename').textContent = name;
+      setState('loading');
+
+      // Set raw link
+      const rawBtn = document.getElementById('raw-btn');
+      rawBtn.href = path;
+      rawBtn.style.display = 'inline-flex';
+
+      /* ── Image files ── */
+      if (type === 'img') {
+        document.getElementById('copy-btn').style.display = 'none';
+        const img = document.getElementById('preview-img');
+        img.onload  = () => setState('img');
+        img.onerror = () => setState('error', path, 'Image not found at: ' + path);
+        img.src = path + '?v=' + Date.now(); // cache-bust
+        return;
+      }
+
+      /* ── Text / code files ── */
+      document.getElementById('copy-btn').style.display = 'inline-flex';
+
+      try {
+        const res = await fetch(path, { cache: 'no-store' });
+
+        if (!res.ok) {
+          throw new Error('HTTP ' + res.status + ' — ' + res.statusText);
+        }
+
+        const text = await res.text();
+        currentCode = text;
+
+        // Build line numbers
+        const lines = text.split('\n');
+        const lineNums = document.getElementById('line-numbers');
+        lineNums.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
+
+        // Syntax highlight
+        const highlighted = type === 'json'
+          ? highlightJSON(escHtml(text))
+          : highlightJS(escHtml(text));
+
+        document.getElementById('code-pre').innerHTML = highlighted;
+        setState('code');
+
+      } catch (err) {
+        console.error('[CCHelper Viewer] Failed to load', path, err);
+        let hint = '';
+        if (location.protocol === 'file:') {
+          hint = 'You opened index.html directly as a file://. Please use a local web server (e.g. VS Code Live Server or "npx serve .") so fetch() can load the source files.';
+        } else {
+          hint = 'File not found: ' + path + '\n' + err.message;
+        }
+        setState('error', path, hint);
+      }
+    }
+
+    function setState(state, filePath, hint) {
+      document.getElementById('code-empty').style.display   = state === 'empty'   ? 'flex'  : 'none';
+      document.getElementById('code-loading').style.display = state === 'loading' ? 'flex'  : 'none';
+      document.getElementById('code-error').style.display   = state === 'error'   ? 'flex'  : 'none';
+      document.getElementById('img-preview').style.display  = state === 'img'     ? 'block' : 'none';
+
+      const cd = document.getElementById('code-display');
+      cd.style.display = state === 'code' ? 'flex' : 'none';
+
+      if (state === 'error') {
+        document.getElementById('code-error-path').textContent = filePath || '';
+        if (hint) {
+          document.getElementById('code-error-msg').innerHTML =
+            '⚠️ Could not load file.<br><span style="font-size:0.82rem;opacity:0.75;font-weight:400;">' +
+            escHtml(hint) + '</span>';
+        }
+      }
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function highlightJS(code) {
+      const keywords = /\b(const|let|var|function|return|if|else|for|while|switch|case|break|new|class|extends|import|export|default|typeof|instanceof|this|null|undefined|true|false|async|await|try|catch|throw|of|in)\b/g;
+      return code
+        .replace(/\/\/.*$/gm,        m => `<span class="t-cmt">${m}</span>`)
+        .replace(/\/\*[\s\S]*?\*\//g, m => `<span class="t-cmt">${m}</span>`)
+        .replace(/(&#39;|&quot;)(.*?)\1/g, m => `<span class="t-str">${m}</span>`)
+        .replace(/`[^`]*`/g,              m => `<span class="t-str">${m}</span>`)
+        .replace(keywords,                m => `<span class="t-kw">${m}</span>`)
+        .replace(/\b(\d+\.?\d*)\b/g,     m => `<span class="t-num">${m}</span>`)
+        .replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g, m => `<span class="t-fn">${m}</span>`);
+    }
+
+    function highlightJSON(code) {
+      return code
+        .replace(/"([^"]+)":/g,      (_, k) => `<span class="t-key">"${k}"</span>:`)
+        .replace(/:\s*"([^"]*)"/g,   (_, v) => `: <span class="t-str">"${v}"</span>`)
+        .replace(/:\s*(\d+\.?\d*)/g, (_, n) => `: <span class="t-num">${n}</span>`)
+        .replace(/:\s*(true|false|null)/g, (_, b) => `: <span class="t-kw">${b}</span>`);
+    }
+
+    function copyCode() {
+      if (!currentCode) return;
+      navigator.clipboard.writeText(currentCode).then(() => {
+        showToast('Code copied to clipboard! 📋', '📋', 2500);
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+      }).catch(() => {
+        showToast('Could not copy — try selecting manually.', '⚠️', 3000);
+      });
+    }
+  </script>
+</body>
+</html>
