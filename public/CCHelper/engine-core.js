@@ -106,7 +106,6 @@
   color: rgba(250,255,248,0.45);
   cursor: pointer;
   font-size: 11px;
-  margin-left: auto;
   padding: 2px 4px;
   border-radius: 4px;
   transition: color 0.15s, background 0.15s;
@@ -475,6 +474,29 @@ input.slider-rolling::-moz-range-track {
   border-radius: 50%;
   flex-shrink: 0;
 }
+  /* ── User count pill ── */
+.engine-user-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(188,255,184,0.75);
+  background: rgba(92,200,91,0.12);
+  border: 1px solid rgba(92,200,91,0.2);
+  padding: 1px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  margin-left: auto;
+}
+.engine-user-count .euc-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #4DFF91;
+  animation: cc-pulse 2s infinite;
+  flex-shrink: 0;
+}
 `;
   (document.head || document.documentElement).appendChild(style);
 
@@ -501,8 +523,13 @@ input.slider-rolling::-moz-range-track {
       <span class="ehl-7"></span><span class="ehl-8"></span><span class="ehl-9"></span>
     </div>
     <span>CC Helper</span>
-    <span class="version">v8.0</span>
   `;
+  const userCountPill = document.createElement("span");
+userCountPill.className = "engine-user-count";
+userCountPill.id = "cc-user-count";
+userCountPill.innerHTML = `<span class="euc-dot"></span><span class="euc-text">…</span>`;
+header.appendChild(userCountPill);
+window.__ccUserCountEl__ = userCountPill;
 
   const closeBtn = document.createElement("button");
   closeBtn.textContent = "✖";
@@ -610,5 +637,82 @@ engineBtn.onclick = () => {
     box.append(label, slider);
     return { box, slider, valueDisplay };
   }
+
+  // ── Active user presence ──────────────────────────────────────────────────
+  function setupPresence() {
+    const FIREBASE_API_KEY  = "AIzaSyBNcwFgoFyKUP3vm7eYSjDRvzzNsSnIABM";
+    const FIRESTORE_PROJECT = "chat-7144e";
+
+    // Always generate a fresh ID per tab — never reuse from sessionStorage
+    const tabId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+    const COUNTER_REF_PATH = `presence/global`;
+    const COMMIT_URL = `https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents:commit?key=${FIREBASE_API_KEY}`;
+    const DOC_PATH   = `projects/${FIRESTORE_PROJECT}/databases/(default)/documents/presence/global`;
+
+    let joined = false;
+
+    function waitForDb(cb) {
+      if (window.__ccFirebaseDb__) { cb(window.__ccFirebaseDb__); return; }
+      let attempts = 0;
+      const t = setInterval(() => {
+        attempts++;
+        if (window.__ccFirebaseDb__) { clearInterval(t); cb(window.__ccFirebaseDb__); }
+        else if (attempts > 60) { clearInterval(t); }
+      }, 500);
+    }
+
+    waitForDb(async (db) => {
+      // Ensure the counter doc exists before incrementing
+      const ref = db.collection("presence").doc("global");
+      try {
+        const snap = await ref.get();
+        if (!snap.exists) {
+          await ref.set({ count: 0 });
+        }
+      } catch(e) { console.warn("Presence: init doc failed:", e); }
+
+      // Increment — one per tab
+      try {
+        await ref.update({
+          count: firebase.firestore.FieldValue.increment(1)
+        });
+        joined = true;
+      } catch(e) { console.warn("Presence: join failed:", e); }
+
+      // Listen to the counter and update the pill
+      db.collection("presence").doc("global").onSnapshot(snap => {
+        if (!snap.exists) return;
+        const count = Math.max(0, snap.data().count || 0);
+        const el = window.__ccUserCountEl__;
+        if (el) el.querySelector('.euc-text').textContent = count + ' Active';
+      }, () => {});
+    });
+
+    // On tab close — decrement via keepalive REST (same pattern as chat memberCount)
+    window.addEventListener("beforeunload", () => {
+      if (!joined) return;
+      try {
+        fetch(COMMIT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            writes: [{
+              transform: {
+                document: DOC_PATH,
+                fieldTransforms: [{
+                  fieldPath: "count",
+                  increment: { integerValue: "-1" }
+                }]
+              }
+            }]
+          }),
+          keepalive: true
+        });
+      } catch(_) {}
+    });
+  }
+
+  setTimeout(setupPresence, 2000);
   window.__createSliderBox__ = createSliderBox;
 })();
