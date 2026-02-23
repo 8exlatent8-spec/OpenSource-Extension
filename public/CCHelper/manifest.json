@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Castles.cc Helper (FREE)",
+  "version": "8.0",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.castles.cc/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "engine-core.js",
+        "engine-chat.js",
+        "engine-games.js",
+        "engine-timer.js",
+        "engine-prices.js",
+        "engine-craft.js"
+      ],
+      "matches": ["*://*.castles.cc/*"]
+    }
+  ],
+  "host_permissions": [
+  "https://cubiccastles.com/*"
+]
+}
