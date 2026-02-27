@@ -29,26 +29,219 @@
   ];
 
   // ── SESSION ID ────────────────────────────────────────────────────────────
-  let mySessionId = sessionStorage.getItem("cc_session_id");
-  if (!mySessionId) {
-    mySessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    sessionStorage.setItem("cc_session_id", mySessionId);
-  }
-
-  let myUsername = localStorage.getItem("cc_chat_username");
-  if (!myUsername) {
+ const mySessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  function generateRandomUsername() {
     const adj    = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
     const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
     const num    = String(Math.floor(Math.random() * 90) + 10);
-    myUsername   = adj + animal + num;
-    localStorage.setItem("cc_chat_username", myUsername);
+    return adj + animal + num;
   }
-
+let myUsername = generateRandomUsername();
   // ── TAB PANEL — created first so setStatus can write into it ─────────────
   const chatContent = document.createElement("div");
   chatContent.style.cssText = "display:none;position:relative;font-family:monospace;";
   contentWrap.appendChild(chatContent);
   content["Chat"] = chatContent;
+
+  // ── NOTIFICATION STATE ────────────────────────────────────────────────────
+  let notificationsEnabled = localStorage.getItem("cc_notif_enabled") !== "false"; // default ON
+  let unreadCount = 0;
+  let lastSeenMsgIds = new Set(); // track seen message IDs to avoid re-notifying
+  let isInitialLoad = true; // suppress notifications on first snapshot load
+  let unsubGeneral = null; // subscription for general room when in another room
+  let audioCtx = null;
+
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playNotifSound() {
+    if (!notificationsEnabled) return;
+    try {
+      const ctx = getAudioCtx();
+      // Soft two-tone ping
+      const freqs = [880, 1100];
+      freqs.forEach((freq, i) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08);
+        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.08 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.08 + 0.22);
+        osc.start(ctx.currentTime + i * 0.08);
+        osc.stop(ctx.currentTime + i * 0.08 + 0.25);
+      });
+    } catch(e) { /* AudioContext not available */ }
+  }
+
+  // ── NOTIFICATION BADGE ────────────────────────────────────────────────────
+  // Find or create the Chat tab label in the engine tab bar to place a badge on it
+  function getChatTabEl() {
+    // Try to find the tab button that corresponds to the Chat tab
+    // The engine typically renders tabs as buttons/spans with the key name
+    const allBtns = document.querySelectorAll("button, [data-tab], .tab, .tab-btn");
+    for (const btn of allBtns) {
+      if (btn.textContent.trim() === "Chat" || btn.dataset.tab === "Chat") return btn;
+    }
+    return null;
+  }
+
+  let badgeEl = null;
+
+  function ensureBadge() {
+    if (badgeEl) return badgeEl;
+    // Inject into the chat content top-left bar area
+    badgeEl = document.createElement("div");
+    badgeEl.id = "cc-notif-badge";
+    badgeEl.style.cssText = `
+      position:absolute;
+      top:-6px; left:-6px;
+      min-width:17px; height:17px;
+      background:linear-gradient(135deg,#ff4444,#cc1111);
+      color:#fff;
+      font-size:9px; font-weight:900;
+      border-radius:9px;
+      display:flex; align-items:center; justify-content:center;
+      padding:0 4px;
+      border:2px solid rgba(0,0,0,0.7);
+      box-shadow:0 2px 8px rgba(255,0,0,0.45);
+      z-index:10020;
+      opacity:0;
+      transform:scale(0.4);
+      transition:opacity 0.18s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events:none;
+      font-family:monospace;
+      line-height:1;
+      box-sizing:border-box;
+    `;
+    badgeEl.textContent = "0";
+
+    // We'll place this in the chatContent's parent wrapper
+    // or inject it near the tab. For maximum compatibility, attach to chatContent container.
+    chatContent.style.position = "relative";
+    chatContent.appendChild(badgeEl);
+
+    // Also try to find and badge the actual tab button
+    setTimeout(() => {
+      const tabBtn = getChatTabEl();
+      if (tabBtn) {
+        tabBtn.style.position = "relative";
+        const tabBadge = badgeEl.cloneNode(true);
+        tabBadge.id = "cc-notif-tab-badge";
+        tabBtn.appendChild(tabBadge);
+        window.__ccTabBadge__ = tabBadge;
+      }
+    }, 500);
+
+    return badgeEl;
+  }
+
+  function setUnread(count) {
+    unreadCount = Math.max(0, count);
+    const badge = ensureBadge();
+    const tabBadge = window.__ccTabBadge__;
+
+    const show = unreadCount > 0;
+    const label = unreadCount > 99 ? "99+" : String(unreadCount);
+
+    [badge, tabBadge].forEach(b => {
+      if (!b) return;
+      b.textContent = label;
+      if (show) {
+        b.style.opacity = "1";
+        b.style.transform = "scale(1)";
+        b.style.pointerEvents = "none";
+      } else {
+        b.style.opacity = "0";
+        b.style.transform = "scale(0.4)";
+      }
+    });
+  }
+
+  function clearUnread() {
+    setUnread(0);
+    isInitialLoad = false;
+  }
+
+  // ── NOTIFICATION TOGGLE BUTTON ────────────────────────────────────────────
+  // Returns a bell icon button to embed in the list header bar
+  function mkNotifToggle() {
+    const btn = document.createElement("button");
+    btn.title = notificationsEnabled ? "Notifications ON — click to disable" : "Notifications OFF — click to enable";
+    btn.style.cssText = `
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.14);
+      border-radius:4px;
+      cursor:pointer;
+      padding:3px 6px;
+      transition:opacity 0.15s, background 0.15s, border-color 0.15s;
+      flex-shrink:0;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      gap:3px;
+      font-size:10px;
+      color:rgba(255,255,255,0.7);
+    `;
+    function refresh() {
+      btn.title = notificationsEnabled ? "Notifications ON — click to disable" : "Notifications OFF — click to enable";
+      btn.style.background    = notificationsEnabled ? "rgba(35,55,35,0.85)" : "rgba(255,255,255,0.05)";
+      btn.style.borderColor   = notificationsEnabled ? "rgba(100,200,100,0.3)"  : "rgba(255,255,255,0.1)";
+      btn.style.color         = notificationsEnabled ? "rgba(120,220,120,0.95)" : "rgba(255,255,255,0.28)";
+      btn.innerHTML = notificationsEnabled
+        ? `<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 2C7.24 2 5 4.24 5 7v5l-1.5 2h13L15 12V7c0-2.76-2.24-5-5-5z" fill="currentColor"/><path d="M10 18a2 2 0 0 0 2-2H8a2 2 0 0 0 2 2z" fill="currentColor"/></svg><span>ON</span>`
+        : `<svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 2C7.24 2 5 4.24 5 7v5l-1.5 2h13L15 12V7c0-2.76-2.24-5-5-5z" fill="currentColor" opacity="0.35"/><path d="M10 18a2 2 0 0 0 2-2H8a2 2 0 0 0 2 2z" fill="currentColor" opacity="0.35"/><line x1="3" y1="3" x2="17" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>OFF</span>`;
+    }
+    refresh();
+    btn.onmouseenter = () => { btn.style.opacity = "0.9"; };
+    btn.onmouseleave = () => { btn.style.opacity = "1"; };
+    btn.onclick = () => {
+      notificationsEnabled = !notificationsEnabled;
+      localStorage.setItem("cc_notif_enabled", notificationsEnabled ? "true" : "false");
+      refresh();
+      // Unlock AudioContext on first user interaction
+      if (notificationsEnabled) {
+        try { getAudioCtx().resume(); } catch(e) {}
+      }
+    };
+    return btn;
+  }
+
+  // ── GENERAL ROOM BACKGROUND WATCHER ──────────────────────────────────────
+  // When user is in a specific room, watch General for new messages too
+  function startGeneralWatcher() {
+    stopGeneralWatcher();
+    let generalInitDone = false;
+    const seenGeneral = new Set();
+    unsubGeneral = db.collection("parties").doc("general")
+      .collection("messages")
+      .orderBy("timestamp", "desc")
+      .limit(1)
+      .onSnapshot(snap => {
+        if (!generalInitDone) {
+          // seed seen IDs on first snapshot to avoid notifying old messages
+          snap.forEach(doc => seenGeneral.add(doc.id));
+          generalInitDone = true;
+          return;
+        }
+        snap.forEach(doc => {
+          if (seenGeneral.has(doc.id)) return;
+          seenGeneral.add(doc.id);
+          const d = doc.data();
+          if (d.sender === myUsername) return;
+          setUnread(unreadCount + 1);
+          playNotifSound();
+        });
+      }, () => {});
+  }
+
+  function stopGeneralWatcher() {
+    if (unsubGeneral) { unsubGeneral(); unsubGeneral = null; }
+  }
 
   // ── SETSTATUS — defined right after chatContent so the immediate call works
   function setStatus(msg, phase) {
@@ -97,6 +290,19 @@
       60%    { transform:translateX(-4px); }
       80%    { transform:translateX(4px); }
     }
+    @keyframes cc-notif-pop {
+      0%  { transform:scale(0.3) rotate(-15deg); opacity:0; }
+      60% { transform:scale(1.2) rotate(3deg);  opacity:1; }
+      100%{ transform:scale(1)   rotate(0deg);  opacity:1; }
+    }
+    @keyframes cc-bell-ring {
+      0%,100% { transform:rotate(0deg); }
+      15%     { transform:rotate(18deg); }
+      30%     { transform:rotate(-16deg); }
+      45%     { transform:rotate(12deg); }
+      60%     { transform:rotate(-8deg); }
+      75%     { transform:rotate(4deg); }
+    }
     .cc-shake { animation: ccShake 0.38s ease; }
     .cc-scroll::-webkit-scrollbar       { width:3px; }
     .cc-scroll::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); }
@@ -144,6 +350,35 @@
       box-shadow:0 6px 28px rgba(0,0,0,0.75);
     }
     .cc-popup.cc-perr { border-color:#7a1a1a !important; }
+    /* notification badge pop animation */
+    #cc-notif-badge[style*="opacity: 1"],
+    #cc-notif-tab-badge[style*="opacity: 1"] {
+      animation: cc-notif-pop 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .cc-bell-ring svg {
+      animation: cc-bell-ring 0.5s ease;
+    }
+    /* Toast notification */
+    .cc-toast {
+      position:fixed;
+      bottom:20px; right:20px;
+      background:rgba(14,22,36,0.97);
+      border:1px solid rgba(80,120,255,0.3);
+      border-radius:8px;
+      padding:8px 12px;
+      display:flex; align-items:center; gap:8px;
+      font-family:monospace; font-size:11px; color:#ccc;
+      box-shadow:0 4px 20px rgba(0,0,0,0.65);
+      z-index:99999;
+      max-width:240px;
+      opacity:0;
+      transform:translateY(8px);
+      transition:opacity 0.18s, transform 0.18s;
+      pointer-events:none;
+    }
+    .cc-toast.cc-toast-show {
+      opacity:1; transform:translateY(0);
+    }
   `;
   (document.head || document.documentElement).appendChild(ST);
 
@@ -165,25 +400,23 @@
   }
 
   // ── USERNAME UNIQUENESS ───────────────────────────────────────────────────
-  async function claimUsername(username) {
-    if (!db) return false;
-    const ref = db.collection("usernames").doc(username);
-    try {
-      await db.runTransaction(async tx => {
-        const snap = await tx.get(ref);
-        if (snap.exists && snap.data().sessionId !== mySessionId) {
-          throw new Error("taken");
-        }
-        tx.set(ref, {
-          sessionId:  mySessionId,
-          claimedAt:  firebase.firestore.FieldValue.serverTimestamp()
-        });
+async function claimUsername(username) {
+  if (!db) return false;
+  const ref = db.collection("usernames").doc(username);
+  try {
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (snap.exists) {
+        throw new Error("taken");
+      }
+      tx.set(ref, {
+        sessionId: mySessionId,
+        claimedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      return true;
-    } catch(e) {
-      return false;
-    }
-  }
+    });
+    return true;
+  } catch(e) { return false; }
+}
 
   async function releaseUsername(username) {
     if (!db || !username) return;
@@ -203,12 +436,7 @@
     } catch(_) {}
   }
 
-  function generateRandomUsername() {
-    const adj    = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-    const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
-    const num    = String(Math.floor(Math.random() * 90) + 10);
-    return adj + animal + num;
-  }
+
 
   async function initUsername() {
     let claimed = await claimUsername(myUsername);
@@ -354,6 +582,7 @@
       db = await getFirebaseDb();
       setStatus("Reserving Username", "username");
       await initUsername();
+
       setStatus("Loading Rooms", "rooms");
       await ensureGeneralRoom();
       renderList();
@@ -381,10 +610,68 @@
     } catch(e) { console.warn("ensureGeneralRoom:", e); }
   }
 
+  // ── TOAST ─────────────────────────────────────────────────────────────────
+  let toastTimer = null;
+  function showToast(sender, text, roomName) {
+    if (!notificationsEnabled) return;
+    let toast = document.getElementById("cc-global-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "cc-global-toast";
+      toast.className = "cc-toast";
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `
+      <div style="font-size:14px;flex-shrink:0;">🔔</div>
+      <div style="overflow:hidden;">
+        <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-bottom:1px;">${roomName}</div>
+        <div style="font-size:10px;font-weight:bold;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sender}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;">${text}</div>
+      </div>
+    `;
+    if (toastTimer) clearTimeout(toastTimer);
+    requestAnimationFrame(() => {
+      toast.classList.add("cc-toast-show");
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("cc-toast-show");
+      }, 3200);
+    });
+  }
+
   // ── LIST VIEW ─────────────────────────────────────────────────────────────
   function renderList() {
     clearSubs();
+    stopGeneralWatcher();
     chatContent.innerHTML = "";
+
+    // Re-append badge after innerHTML wipe
+    ensureBadge();
+
+    // Start watching General for notifications while on list view
+    if (db) {
+      let listInitDone = false;
+      const seenList = new Set();
+      unsubGeneral = db.collection("parties").doc("general")
+        .collection("messages")
+        .orderBy("timestamp", "desc")
+        .limit(1)
+        .onSnapshot(snap => {
+          if (!listInitDone) {
+            snap.forEach(doc => seenList.add(doc.id));
+            listInitDone = true;
+            return;
+          }
+          snap.forEach(doc => {
+            if (seenList.has(doc.id)) return;
+            seenList.add(doc.id);
+            const d = doc.data();
+            if (d.sender === myUsername) return;
+            setUnread(unreadCount + 1);
+            playNotifSound();
+            showToast(d.sender, d.text, "General");
+          });
+        }, () => {});
+    }
 
     const bar = mk("div", "padding:8px 8px 6px;border-bottom:1px solid rgba(255,255,255,0.08);");
 
@@ -402,7 +689,9 @@
     editBtn.onmouseleave = () => { editBtn.style.opacity = "0.7"; editBtn.style.background = "rgba(255,255,255,0.07)"; };
     editBtn.onclick = () => showUsernameEdit(uBadge);
 
-    uRow.append(uAvatar, uBadge, editBtn);
+    // ── NOTIFICATION TOGGLE in user row ──────────────────────────────────
+    const notifBtn = mkNotifToggle();
+    uRow.append(uAvatar, uBadge, notifBtn, editBtn);
     bar.append(uRow);
     chatContent.appendChild(bar);
 
@@ -493,6 +782,9 @@
 
   // ── ENTER ─────────────────────────────────────────────────────────────────
   function handleEnter(partyId, data) {
+    // Clear unread when entering a room
+    clearUnread();
+    stopGeneralWatcher();
     if (data.visibility === "public") {
       joinParty(partyId, data);
     } else {
@@ -652,6 +944,8 @@
         };
         const ref = await db.collection("parties").add(data);
         currentParty = { id: ref.id, ...data };
+        clearUnread();
+        stopGeneralWatcher();
         await adjustMemberCount(ref.id, 1);
         renderChat();
       } catch(e) {
@@ -683,6 +977,15 @@
     if (!currentParty) { renderList(); return; }
     chatContent.innerHTML = "";
 
+    // Re-append badge
+    ensureBadge();
+
+    const isInGeneral = currentParty.id === "general";
+    const isChatTabVisible = () => chatContent.style.display !== "none";
+
+    // If NOT in general, start background watcher for general
+    if (!isInGeneral) startGeneralWatcher();
+
     const outer = mk("div", "display:flex;flex-direction:column;");
     chatContent.appendChild(outer);
 
@@ -704,12 +1007,23 @@
     }
     hdr.appendChild(center);
 
-    const onlineEl = mk("div", "margin-left:auto;display:flex;align-items:center;gap:4px;flex-shrink:0;position:relative;z-index:1;");
+    // Right side: notif toggle + online indicator
+    const rightGroup = mk("div", "margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0;position:relative;z-index:1;");
+
+    // Notification toggle button (compact, icon-only in chat header)
+    const chatNotifBtn = mkNotifToggle();
+    chatNotifBtn.querySelector("span") && (chatNotifBtn.querySelector("span").style.display = "none"); // hide text label in header
+    chatNotifBtn.style.padding = "3px 5px";
+    chatNotifBtn.title = notificationsEnabled ? "Notifications ON" : "Notifications OFF";
+    rightGroup.appendChild(chatNotifBtn);
+
+    const onlineEl = mk("div", "display:flex;align-items:center;gap:4px;");
     const onlineDot = mk("span", "display:inline-block;width:5px;height:5px;border-radius:50%;background:rgba(80,200,120,0.85);flex-shrink:0;");
     const onlineTxt = mk("span", "font-size:9px;color:rgba(255,255,255,0.5);white-space:nowrap;");
     onlineTxt.textContent = "… online";
     onlineEl.append(onlineDot, onlineTxt);
-    hdr.appendChild(onlineEl);
+    rightGroup.appendChild(onlineEl);
+    hdr.appendChild(rightGroup);
 
     const onlineUnsub = db.collection("parties").doc(currentParty.id)
       .onSnapshot(snap => {
@@ -774,11 +1088,35 @@
       if (e.key === "Enter") { e.preventDefault(); send(); }
     });
 
+    // ── Message subscription with notification logic ─────────────────────
+    let chatInitDone = false;
+    const seenChat = new Set();
+
     unsubMsgs = db.collection("parties").doc(currentParty.id)
       .collection("messages")
       .orderBy("timestamp", "desc")
       .limit(80)
       .onSnapshot(snap => {
+        if (!chatInitDone) {
+          // Seed seen IDs so we don't notify on load
+          snap.forEach(doc => seenChat.add(doc.id));
+          chatInitDone = true;
+        } else {
+          snap.forEach(doc => {
+            if (seenChat.has(doc.id)) return;
+            seenChat.add(doc.id);
+            const d = doc.data();
+            if (d.sender === myUsername) return;
+            // Always play sound
+            playNotifSound();
+            // If user switched away from Chat tab, show badge + toast too
+            if (!isChatTabVisible()) {
+              setUnread(unreadCount + 1);
+              showToast(d.sender, d.text, currentParty.name);
+            }
+          });
+        }
+
         msgs.innerHTML = "";
         if (snap.empty) {
           const h = mk("div", "color:rgba(255,255,255,0.22);font-size:10px;text-align:center;padding:12px;");
@@ -809,7 +1147,7 @@
   }
 
   // ── TAB CLOSE ─────────────────────────────────────────────────────────────
-  window.addEventListener("beforeunload", () => {
+window.addEventListener("beforeunload", () => {
     releaseOnUnload(myUsername);
     if (currentParty) decrementOnUnload(currentParty.id);
   });

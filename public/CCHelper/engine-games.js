@@ -195,8 +195,59 @@
     .pb-shoot-btn:disabled { opacity:0.3;cursor:not-allowed;transform:none;box-shadow:none; }
     .pb-gameover-wrap { position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:300; }
     .pb-gameover-box { background:linear-gradient(160deg,#0a2010,#050e07);border:1px solid rgba(100,200,100,0.3);border-radius:12px;padding:20px 16px;text-align:center;color:#ccc;font-family:monospace;animation:pbPop 0.22s ease;min-width:170px; }
+    @keyframes c4Drop { 0%{transform:translateY(-120px) scale(0.8);opacity:0} 80%{transform:translateY(6px) scale(1.05);opacity:1} 100%{transform:translateY(0) scale(1);opacity:1} }
+@keyframes c4Win { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.18);filter:brightness(1.5)} }
+@keyframes c4Pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.c4-game { display:flex;flex-direction:column;height:100%;background:linear-gradient(160deg,#08101e 0%,#04080f 100%);position:relative;overflow:hidden; }
+.c4-scorebar { display:flex;align-items:stretch;flex-shrink:0;border-bottom:1px solid rgba(80,120,255,0.2); }
+.c4-sb-half { flex:1;display:flex;flex-direction:column;align-items:center;padding:5px 4px;gap:2px;min-width:0;transition:background 0.2s; }
+.c4-sb-half.active { background:rgba(80,120,255,0.1);border-bottom:2px solid #5a8aff; }
+.c4-sb-half.inactive { border-bottom:2px solid transparent; }
+.c4-sb-name { font-size:9px;color:rgba(255,255,255,0.5);font-weight:bold;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center; }
+.c4-sb-disc { width:15px;height:15px;border-radius:50%;border:2px solid rgba(0,0,0,0.5); }
+.c4-sb-disc.r { background:radial-gradient(circle at 35% 30%,#ff8080,#b91c1c); }
+.c4-sb-disc.y { background:radial-gradient(circle at 35% 30%,#ffe566,#d97706); }
+.c4-sb-you { font-size:7px;color:rgba(100,220,120,0.7);letter-spacing:1px; }
+.c4-sb-div { width:1px;background:rgba(255,255,255,0.1);flex-shrink:0; }
+.c4-board-wrap { flex:1;display:flex;align-items:center;justify-content:center;padding:6px;overflow:hidden; }
+.c4-board { background:linear-gradient(145deg,#1a2ea0,#0f1c70);border-radius:10px;padding:6px 4px;box-shadow:0 8px 32px rgba(0,0,60,0.9),inset 0 1px rgba(255,255,255,0.08);display:flex;flex-direction:row;gap:0; }
+.c4-col { display:flex;flex-direction:column;cursor:pointer;border-radius:5px;transition:background 0.12s;padding:2px; }
+.c4-col:hover { background:rgba(255,255,255,0.08); }
+.c4-col.inactive { cursor:default; }
+.c4-col.inactive:hover { background:transparent; }
+.c4-col-arrow { font-size:9px;text-align:center;opacity:0;transition:opacity 0.15s;line-height:1.4;margin-bottom:1px;pointer-events:none; }
+.c4-col:hover .c4-col-arrow { opacity:1; }
+.c4-col.inactive .c4-col-arrow { opacity:0 !important; }
+.c4-cell { width:32px;height:32px;border-radius:50%;margin:2px;box-shadow:inset 0 3px 8px rgba(0,0,0,0.7);background:rgba(0,0,0,0.6);transition:none; }
+.c4-cell.r { background:radial-gradient(circle at 35% 28%,#ff9090,#b91c1c);box-shadow:0 2px 10px rgba(185,28,28,0.7),inset 0 1px rgba(255,200,200,0.25); }
+.c4-cell.y { background:radial-gradient(circle at 35% 28%,#fff176,#d97706);box-shadow:0 2px 10px rgba(217,119,6,0.7),inset 0 1px rgba(255,245,150,0.3); }
+.c4-cell.drop { animation:c4Drop 0.32s cubic-bezier(0.22,0.61,0.36,1) forwards; }
+.c4-cell.win { animation:c4Win 0.55s ease infinite; }
+.c4-status { font-size:10px;text-align:center;padding:4px 8px;color:rgba(255,255,255,0.4);flex-shrink:0;min-height:22px;letter-spacing:0.2px; }
+.c4-status.myturn { color:rgba(140,180,255,0.95);font-weight:bold; }
+.c4-status.waiting { color:rgba(255,255,255,0.28); }
+.c4-gameover-wrap { position:absolute;inset:0;background:rgba(0,0,0,0.84);display:flex;align-items:center;justify-content:center;z-index:300; }
+.c4-gameover-box { background:linear-gradient(160deg,#0c1a40,#060c22);border:1px solid rgba(80,120,255,0.4);border-radius:12px;padding:20px 16px;text-align:center;color:#ccc;font-family:monospace;animation:gcPop 0.22s ease;min-width:170px; }
     .pb-foul-banner { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(180,0,0,0.9);border:1px solid #f00;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:bold;color:#fff;z-index:100;pointer-events:none;white-space:nowrap;animation:pbPop 0.15s ease; }
-  `;
+  @keyframes bsHit { 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} }
+    .bs-game { display:flex;flex-direction:column;height:100%;background:linear-gradient(160deg,#050d1a 0%,#020810 100%);position:relative;overflow:hidden; }
+    .bs-hdr { position:relative;display:flex;align-items:center;padding:4px 8px;background:rgba(0,0,0,0.5);border-bottom:1px solid rgba(0,150,255,0.2);min-height:28px;flex-shrink:0; }
+    .bs-cell { aspect-ratio:1;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;transition:background 0.1s;user-select:none;box-sizing:border-box; }
+    .bs-cell.water { background:rgba(0,80,180,0.3);border:1px solid rgba(0,120,255,0.12); }
+    .bs-cell.target:hover { background:rgba(255,60,60,0.55);border:1px solid rgba(255,80,80,0.6); }
+    .bs-cell.ship { background:rgba(80,110,170,0.65);border:1px solid rgba(130,170,255,0.3); }
+    .bs-cell.hit { background:rgba(220,40,40,0.85);border:1px solid rgba(255,80,80,0.5);animation:bsHit 0.35s ease; }
+    .bs-cell.miss { background:rgba(200,220,255,0.1);border:1px solid rgba(200,220,255,0.18); }
+    .bs-cell.sunk { background:rgba(160,0,0,0.9);border:1px solid rgba(255,40,40,0.6); }
+    .bs-cell.preview { background:rgba(0,200,100,0.5);border:1px solid rgba(0,255,120,0.65); }
+    .bs-cell.preview-bad { background:rgba(200,50,50,0.5);border:1px solid rgba(255,80,80,0.65); }
+    .bs-ship-item { display:flex;align-items:center;gap:6px;padding:4px 7px;border-radius:4px;cursor:pointer;transition:background 0.12s;border:1px solid transparent;font-family:monospace; }
+    .bs-ship-item:hover:not(.bs-placed) { background:rgba(0,120,255,0.15); }
+    .bs-ship-item.bs-selected { background:rgba(0,120,255,0.22);border-color:rgba(0,160,255,0.45); }
+    .bs-ship-item.bs-placed { opacity:0.38;cursor:default; }
+    .bs-gameover-wrap { position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:300; }
+    .bs-gameover-box { background:linear-gradient(160deg,#060e1e,#020810);border:1px solid rgba(0,150,255,0.4);border-radius:12px;padding:20px 16px;text-align:center;color:#ccc;font-family:monospace;animation:gcPop 0.22s ease;min-width:170px; }
+    `;
   (document.head || document.documentElement).appendChild(ST);
 
   const Chess = (() => {
@@ -817,7 +868,7 @@
         balls: rackBalls(),
         p1Type: null,
         p2Type: null,
-        status: "playing",
+        status: "waiting",
         result: null,
         resultReason: null,
         foul: false,
@@ -1030,6 +1081,93 @@
       FRICTION,
       MIN_SPEED,
     };
+  })();
+  const Connect4 = (() => {
+    const ROWS = 6, COLS = 7;
+    function idx(r, c) { return r * COLS + c; }
+    function initBoard() { return Array(ROWS * COLS).fill(null); }
+    function getCell(board, r, c) { return board[idx(r, c)]; }
+    function dropPiece(board, col, color) {
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (!board[idx(r, col)]) {
+          const nb = [...board];
+          nb[idx(r, col)] = color;
+          return { board: nb, row: r };
+        }
+      }
+      return null;
+    }
+    function checkWinner(board) {
+      const check = (r, c, dr, dc) => {
+        const v = board[idx(r, c)];
+        if (!v) return null;
+        const cells = [{r, c}];
+        for (let i = 1; i < 4; i++) {
+          const nr = r + dr * i, nc = c + dc * i;
+          if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS || board[idx(nr, nc)] !== v) return null;
+          cells.push({r: nr, c: nc});
+        }
+        return { winner: v, cells };
+      };
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        const w = check(r,c,0,1)||check(r,c,1,0)||check(r,c,1,1)||check(r,c,1,-1);
+        if (w) return w;
+      }
+      if (board.every(v => v !== null)) return { winner: 'draw', cells: [] };
+      return null;
+    }
+    function initGameState(p1, p2) {
+      return {
+        players: { p1, p2 }, currentPlayer: 'p1',
+        board: initBoard(), lastMove: null, winCells: null,
+        status: 'playing', result: null,
+      };
+    }
+    return { ROWS, COLS, initBoard, dropPiece, checkWinner, getCell, initGameState };
+  })();
+  const Battleship = (() => {
+    const GRID = 10;
+    const SHIPS = [
+      { id: 'C', name: 'Carrier',    size: 5 },
+      { id: 'B', name: 'Battleship', size: 4 },
+      { id: 'R', name: 'Cruiser',    size: 3 },
+      { id: 'S', name: 'Submarine',  size: 3 },
+      { id: 'D', name: 'Destroyer',  size: 2 },
+    ];
+    function initGrid() { return Array(GRID * GRID).fill(null); }
+    function idx(r, c) { return r * GRID + c; }
+    function canPlace(grid, row, col, size, horiz) {
+      for (let i = 0; i < size; i++) {
+        const r = horiz ? row : row + i, c = horiz ? col + i : col;
+        if (r < 0 || r >= GRID || c < 0 || c >= GRID || grid[idx(r, c)]) return false;
+      }
+      return true;
+    }
+    function placeShip(grid, row, col, size, horiz, shipId) {
+      if (!canPlace(grid, row, col, size, horiz)) return null;
+      const ng = [...grid];
+      for (let i = 0; i < size; i++) {
+        const r = horiz ? row : row + i, c = horiz ? col + i : col;
+        ng[idx(r, c)] = shipId;
+      }
+      return ng;
+    }
+    function checkAllSunk(grid, shots) {
+      for (let i = 0; i < grid.length; i++) {
+        if (grid[i] && shots[i] !== 'hit') return false;
+      }
+      return true;
+    }
+    function initGameState(p1, p2) {
+      return {
+        players: { p1, p2 }, currentPlayer: 'p1',
+        p1Grid: initGrid(), p2Grid: initGrid(),
+        p1Shots: initGrid(), p2Shots: initGrid(),
+        p1Ready: false, p2Ready: false,
+        status: 'waiting', result: null,
+      };
+    }
+    return { GRID, SHIPS, initGrid, idx, canPlace, placeShip, checkAllSunk, initGameState };
   })();
 
   let db = null,
@@ -1267,6 +1405,8 @@
       chess: "\u265f",
       yahtzee: "\uD83C\uDFB2",
       pool: "\uD83C\uDFB1",
+      connect4: "🔴",
+      battleship: "🚢",
     };
     function renderRooms() {
       const q = searchIn.value.trim().toLowerCase();
@@ -1292,7 +1432,7 @@
         }
         const maxPlayers = 2;
         const canSpectate =
-          (status === "playing" || status === "check") &&
+          (status === "playing" || status === "check" || status === "placing") &&
           playerCount >= maxPlayers;
         const row = mk(
           "div",
@@ -1319,23 +1459,25 @@
           "font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(50,30,70,0.8);color:rgba(190,150,255,0.9);border:1px solid rgba(130,90,200,0.3);",
         );
         const gameLabel =
-          gameType === "yahtzee"
-            ? "Yahtzee"
-            : gameType === "pool"
-              ? "8-Ball Pool"
-              : "Chess";
+          gameType === "yahtzee"  ? "Yahtzee"
+          : gameType === "pool"   ? "8-Ball Pool"
+          : gameType === "connect4" ? "Connect 4"
+          : gameType === "battleship" ? "Battleship"
+          : "Chess";
         gameTag.textContent =
           (GAME_ICONS[gameType] || "\uD83C\uDFAE") + " " + gameLabel;
         const statusColors = {
-          waiting: "rgba(180,180,100,0.85)",
-          playing: "rgba(80,200,120,0.85)",
-          check: "rgba(80,200,120,0.85)",
+          waiting:  "rgba(180,180,100,0.85)",
+          placing:  "rgba(100,180,255,0.85)",
+          playing:  "rgba(80,200,120,0.85)",
+          check:    "rgba(80,200,120,0.85)",
           finished: "rgba(120,120,120,0.5)",
         };
         const statusLabels = {
-          waiting: `${playerCount}/${maxPlayers} players`,
-          playing: "In progress",
-          check: "In progress",
+          waiting:  `${playerCount}/${maxPlayers} players`,
+          placing:  "Placing ships",
+          playing:  "In progress",
+          check:    "In progress",
           finished: "Finished",
         };
         const dot = mk(
@@ -1513,7 +1655,8 @@ codeIn.addEventListener("keydown", (e) => {
         if (!snap.exists) return;
         const d = snap.data();
         const pl = d.players || {};
-        const upd = { memberCount: firebase.firestore.FieldValue.increment(1) };
+        
+const upd = {};
         if (gameType === "chess") {
           if (pl.white === user) {
             assignedSlot = "white";
@@ -1534,22 +1677,14 @@ codeIn.addEventListener("keydown", (e) => {
             willSpectate = true;
             upd.spectatorCount = firebase.firestore.FieldValue.increment(1);
           }
-        } else if (gameType === "yahtzee" || gameType === "pool") {
-          if (pl.p1 === user) {
-            assignedSlot = "p1";
-            return;
-          }
-          if (pl.p2 === user) {
-            assignedSlot = "p2";
-            return;
-          }
+        } else if (gameType === "battleship") {
+          if (pl.p1 === user) { assignedSlot = "p1"; return; }
+          if (pl.p2 === user) { assignedSlot = "p2"; return; }
           if (!pl.p1) {
-            upd["players.p1"] = user;
-            assignedSlot = "p1";
+            upd["players.p1"] = user; assignedSlot = "p1";
           } else if (!pl.p2) {
-            upd["players.p2"] = user;
-            assignedSlot = "p2";
-            if (d.status === "waiting") upd.status = "playing";
+            upd["players.p2"] = user; assignedSlot = "p2";
+            if (d.status === "waiting") upd.status = "placing";
           } else {
             willSpectate = true;
             upd.spectatorCount = firebase.firestore.FieldValue.increment(1);
@@ -1663,6 +1798,19 @@ codeIn.addEventListener("keydown", (e) => {
             } else if (pl.p1 === user) upd["players.p1"] = null;
             else if (pl.p2 === user) upd["players.p2"] = null;
           }
+          else if (gameType === "battleship") {
+            if (d.status === "playing" || d.status === "placing") {
+              if (pl.p1 === user) {
+                upd.status = "finished"; upd.result = "p2";
+                upd.resultReason = "forfeit"; upd["players.p1"] = null;
+              } else if (pl.p2 === user) {
+                upd.status = "finished"; upd.result = "p1";
+                upd.resultReason = "forfeit"; upd["players.p2"] = null;
+              }
+            } else if (pl.p1 === user) upd["players.p1"] = null;
+            else if (pl.p2 === user) upd["players.p2"] = null;
+          }
+          
           tx.update(roomRef, upd);
         });
       } catch (e) {
@@ -1716,6 +1864,8 @@ codeIn.addEventListener("keydown", (e) => {
       ["chess", "\u265f  Chess"],
       ["yahtzee", "\uD83C\uDFB2  Yahtzee"],
       ["pool", "\uD83C\uDFB1  8-Ball Pool"],
+      ["connect4", "🔴  Connect 4"],
+      ["battleship", "🚢  Battleship"],
     ].forEach(([val, label]) => {
       const opt = document.createElement("option");
       opt.value = val;
@@ -1826,6 +1976,13 @@ privBtn.onclick = async () => {
         const gs = Pool.initGameState(user, null);
         data = { ...data, players: { p1: user, p2: null }, ...gs };
       }
+      else if (selectedGame === "connect4") {
+        const gs = Connect4.initGameState(user, null);
+        data = { ...data, players: { p1: user, p2: null }, ...gs };
+      }else if (selectedGame === "battleship") {
+        const gs = Battleship.initGameState(user, null);
+        data = { ...data, players: { p1: user, p2: null }, ...gs };
+      }
       try {
         const ref = await db.collection("gameRooms").add(data);
         currentRoom = { id: ref.id, ...data, createdAt: Date.now() };
@@ -1882,8 +2039,10 @@ privBtn.onclick = async () => {
       return;
     }
     const gameType = currentRoom.game || "chess";
-    if (gameType === "yahtzee") renderYahtzeeGame();
+   if (gameType === "yahtzee") renderYahtzeeGame();
     else if (gameType === "pool") renderPoolGame();
+    else if (gameType === "connect4") renderConnect4Game();
+    else if (gameType === "battleship") renderBattleshipGame();
     else renderChessGame();
   }
 
@@ -3607,7 +3766,7 @@ if (currentRoom.visibility === 'private' && currentRoom.code) {
     }
 
     function updateUI(gd) {
-      const isMe = !isSpectator && gd.currentPlayer === myColor;
+      const isMe = !isSpectator && gd.status === "playing" && gd.currentPlayer === myColor;
       const isFinished = gd.status === "finished";
       const pl = gd.players || {};
       updateScorebar(gd);
@@ -3746,7 +3905,458 @@ if (currentRoom.visibility === 'private' && currentRoom.code) {
         (e) => console.error("pool sub:", e),
       );
   }
+function renderConnect4Game() {
+    gamesContent.innerHTML = "";
+    const game = mk("div");
+    game.className = "c4-game";
+    gamesContent.appendChild(game);
 
+    // Header
+    const hdr = mk("div","position:relative;display:flex;align-items:center;padding:4px 8px;background:rgba(0,0,0,0.5);border-bottom:1px solid rgba(80,120,255,0.15);min-height:28px;flex-shrink:0;");
+    const bk = mkBtn("<- Back","gc-btn gc-sm","flex-shrink:0;position:relative;z-index:1;");
+    bk.onclick = leaveRoom;
+    const centerHdr = mk("div","position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;");
+    const rName = mk("div","font-size:10px;font-weight:bold;color:rgba(100,140,255,0.7);letter-spacing:1px;");
+    rName.textContent = currentRoom.name;
+    centerHdr.appendChild(rName);
+    if (currentRoom.visibility === "private" && currentRoom.code) {
+      const ct = mk("span","font-size:8px;padding:1px 5px;border-radius:3px;letter-spacing:2px;font-weight:bold;background:rgba(12,22,65,0.65);color:rgba(120,160,255,0.9);border:1px solid rgba(70,100,220,0.3);margin-top:2px;pointer-events:auto;");
+      ct.textContent = currentRoom.code;
+      centerHdr.appendChild(ct);
+    }
+    const forfeitBtn = mkBtn("Forfeit","gc-btn gc-sm gc-danger","flex-shrink:0;position:relative;z-index:1;margin-left:auto;");
+    forfeitBtn.onclick = leaveRoom;
+    if (isSpectator) forfeitBtn.style.display = "none";
+    hdr.append(bk, centerHdr, forfeitBtn);
+    game.appendChild(hdr);
+
+    // Scorebar
+    const scorebar = mk("div"); scorebar.className = "c4-scorebar";
+    const sb1 = mk("div"); sb1.className = "c4-sb-half";
+    const sb1name = mk("div"); sb1name.className = "c4-sb-name";
+    const sb1disc = mk("div"); sb1disc.className = "c4-sb-disc r";
+    const sb1you = mk("div"); sb1you.className = "c4-sb-you";
+    sb1.append(sb1name, sb1disc, sb1you);
+    const sbDiv = mk("div"); sbDiv.className = "c4-sb-div";
+    const sb2 = mk("div"); sb2.className = "c4-sb-half";
+    const sb2name = mk("div"); sb2name.className = "c4-sb-name";
+    const sb2disc = mk("div"); sb2disc.className = "c4-sb-disc y";
+    const sb2you = mk("div"); sb2you.className = "c4-sb-you";
+    sb2.append(sb2name, sb2disc, sb2you);
+    scorebar.append(sb1, sbDiv, sb2);
+    game.appendChild(scorebar);
+
+    // Board
+    const boardWrap = mk("div"); boardWrap.className = "c4-board-wrap";
+    const boardEl = mk("div"); boardEl.className = "c4-board";
+    const colEls = [];
+    for (let c = 0; c < Connect4.COLS; c++) {
+      const col = mk("div"); col.className = "c4-col inactive";
+      const arrow = mk("div"); arrow.className = "c4-col-arrow"; arrow.textContent = "▼";
+      col.appendChild(arrow);
+      const cells = [];
+      for (let r = 0; r < Connect4.ROWS; r++) {
+        const cell = mk("div"); cell.className = "c4-cell";
+        col.appendChild(cell); cells.push(cell);
+      }
+      colEls.push({ col, cells, arrow });
+      boardEl.appendChild(col);
+    }
+    boardWrap.appendChild(boardEl);
+    game.appendChild(boardWrap);
+
+    const statusEl = mk("div"); statusEl.className = "c4-status waiting";
+    game.appendChild(statusEl);
+
+    let latestGd = null;
+
+    function renderBoard(gd) {
+      latestGd = gd;
+      const pl = gd.players || {};
+      const board = gd.board || Connect4.initBoard();
+      const isFinished = gd.status === "finished";
+      const isMyTurn = !isSpectator && gd.status === "playing" && gd.currentPlayer === myColor;
+      const myDisc = myColor === "p1" ? "r" : "y";
+      const winCells = gd.winCells || [];
+
+      sb1name.textContent = (pl.p1 || "Player 1").slice(0, 12);
+      sb2name.textContent = (pl.p2 || "Waiting...").slice(0, 12);
+      sb1you.textContent = myColor === "p1" && !isSpectator ? "YOU" : "";
+      sb2you.textContent = myColor === "p2" && !isSpectator ? "YOU" : "";
+      sb1.className = "c4-sb-half " + (gd.status==="playing"&&gd.currentPlayer==="p1" ? "active" : "inactive");
+      sb2.className = "c4-sb-half " + (gd.status==="playing"&&gd.currentPlayer==="p2" ? "active" : "inactive");
+
+      for (let c = 0; c < Connect4.COLS; c++) {
+        const { col, cells, arrow } = colEls[c];
+        const colFull = Connect4.getCell(board, 0, c) !== null;
+        const canClick = isMyTurn && !isFinished && !colFull;
+        col.className = "c4-col" + (canClick ? "" : " inactive");
+        arrow.style.color = myDisc === "r" ? "#ff8080" : "#ffe566";
+        col.onclick = canClick ? () => handleDrop(c) : null;
+        for (let r = 0; r < Connect4.ROWS; r++) {
+          const val = Connect4.getCell(board, r, c);
+          const isWin = winCells.some(wc => wc.r===r && wc.c===c);
+          // preserve drop animation class if this cell was just placed
+          const wasDropping = cells[r].classList.contains("drop");
+          cells[r].className = "c4-cell" + (val ? " "+val : "") + (isWin ? " win" : "") + (wasDropping ? " drop" : "");
+        }
+      }
+
+      statusEl.className = "c4-status" + (isMyTurn ? " myturn" : gd.status==="waiting" ? " waiting" : "");
+      if (gd.status === "waiting") statusEl.textContent = "Waiting for opponent...";
+      else if (isFinished) statusEl.textContent = "";
+      else if (isSpectator) {
+        const whose = pl[gd.currentPlayer] || gd.currentPlayer;
+        statusEl.textContent = `${whose}'s turn`;
+      } else if (isMyTurn) {
+        statusEl.textContent = "Your turn — click a column!";
+      } else {
+        statusEl.textContent = `${pl[gd.currentPlayer] || "Opponent"}'s turn...`;
+      }
+
+      if (isFinished && !gamesContent.querySelector(".c4-gameover-wrap")) {
+        showConnect4GameOver(gd, pl);
+      }
+    }
+
+    async function handleDrop(col) {
+      if (!latestGd || !myColor || isSpectator) return;
+      const gd = latestGd;
+      if (gd.status !== "playing" || gd.currentPlayer !== myColor) return;
+      const board = gd.board || Connect4.initBoard();
+      const color = myColor === "p1" ? "r" : "y";
+      const result = Connect4.dropPiece(board, col, color);
+      if (!result) return;
+
+      // Animate drop — remove class after animation ends to avoid re-trigger on re-render
+      const cell = colEls[col].cells[result.row];
+      cell.className = "c4-cell " + color + " drop";
+      cell.addEventListener("animationend", () => cell.classList.remove("drop"), { once: true });
+
+      const winResult = Connect4.checkWinner(result.board);
+      const nextPlayer = gd.currentPlayer === "p1" ? "p2" : "p1";
+      const upd = {
+        board: result.board,
+        lastMove: { row: result.row, col },
+        currentPlayer: nextPlayer,
+      };
+      if (winResult) {
+        upd.status = "finished";
+        upd.result = winResult.winner === "draw" ? "draw" : gd.currentPlayer;
+        upd.winCells = (winResult.cells || []).map(wc => Array.isArray(wc) ? {r: wc[0], c: wc[1]} : wc);
+      }
+      try {
+        await db.collection("gameRooms").doc(currentRoom.id).update(upd);
+      } catch(e) { console.error("c4 drop:", e); }
+    }
+
+    function showConnect4GameOver(gd, pl) {
+      const overlay = mk("div"); overlay.className = "c4-gameover-wrap";
+      const box = mk("div"); box.className = "c4-gameover-box";
+      const icon = mk("div","font-size:32px;margin-bottom:6px;");
+      const hl = mk("div","font-size:14px;font-weight:bold;color:#6488ff;margin-bottom:4px;");
+      const sub = mk("div","font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:12px;");
+      const winner = gd.result;
+      const user = getUser();
+      if (winner === "draw") {
+        icon.textContent = "\uD83E\uDD1D"; hl.textContent = "It's a Draw!"; sub.textContent = "Board is full";
+      } else {
+        const wName = pl[winner] || winner;
+        const reason = gd.resultReason === "forfeit" ? " (forfeit)" : "";
+        if (isSpectator) { icon.textContent = "\uD83C\uDFAF"; hl.textContent = wName + " wins!" + reason; }
+        else if (pl[winner] === user) { icon.textContent = "\uD83C\uDFC6"; hl.textContent = "You win!"; }
+        else { icon.textContent = "\uD83D\uDC80"; hl.textContent = "You lose!"; }
+        sub.textContent = wName + " connected 4!" + reason;
+      }
+      const closeBtn = mkBtn("Back to lobby","gc-btn gc-act","margin-top:4px;width:100%;");
+      closeBtn.onclick = () => { overlay.remove(); leaveRoom(); };
+      box.append(icon, hl, sub, closeBtn);
+      overlay.appendChild(box);
+      gamesContent.appendChild(overlay);
+    }
+
+    renderBoard(currentRoom);
+    unsubRoom = db.collection("gameRooms").doc(currentRoom.id).onSnapshot(
+      (snap) => { if (!snap.exists) { renderList(); return; } renderBoard(snap.data()); },
+      (e) => console.error("c4 sub:", e)
+    );
+  }
+  function renderBattleshipGame() {
+    gamesContent.innerHTML = "";
+    const game = mk("div"); game.className = "bs-game";
+    gamesContent.appendChild(game);
+
+    // ── Header ──────────────────────────────────────────────────────────────
+    const hdr = mk("div"); hdr.className = "bs-hdr";
+    const bk = mkBtn("<- Back","gc-btn gc-sm","flex-shrink:0;position:relative;z-index:1;");
+    bk.onclick = leaveRoom;
+    const centerHdr = mk("div","position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;");
+    const rName = mk("div","font-size:10px;font-weight:bold;color:rgba(0,180,255,0.7);letter-spacing:1px;");
+    rName.textContent = currentRoom.name;
+    centerHdr.appendChild(rName);
+    if (currentRoom.visibility === "private" && currentRoom.code) {
+      const ct = mk("span","font-size:8px;padding:1px 5px;border-radius:3px;letter-spacing:2px;font-weight:bold;background:rgba(5,20,50,0.7);color:rgba(100,180,255,0.9);border:1px solid rgba(0,120,255,0.3);margin-top:2px;pointer-events:auto;");
+      ct.textContent = currentRoom.code; centerHdr.appendChild(ct);
+    }
+    const forfeitBtn = mkBtn("Forfeit","gc-btn gc-sm gc-danger","flex-shrink:0;position:relative;z-index:1;margin-left:auto;");
+    forfeitBtn.onclick = leaveRoom;
+    if (isSpectator) forfeitBtn.style.display = "none";
+    hdr.append(bk, centerHdr, forfeitBtn);
+    game.appendChild(hdr);
+
+    // ── Scrollable main area ─────────────────────────────────────────────────
+    const main = mk("div","flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:6px 8px;gap:6px;");
+    main.className = "gc-scroll";
+    game.appendChild(main);
+
+    let latestGd = null;
+
+    // ── Placing phase ────────────────────────────────────────────────────────
+    function renderPlacing(gd) {
+      main.innerHTML = "";
+      const mySlot = myColor;
+      const myGrid   = (mySlot === "p1" ? gd.p1Grid : gd.p2Grid) || Battleship.initGrid();
+      const myReady  = mySlot === "p1" ? gd.p1Ready : gd.p2Ready;
+      const oppReady = mySlot === "p1" ? gd.p2Ready : gd.p1Ready;
+
+      if (myReady) {
+        const w = mk("div","padding:20px;text-align:center;color:rgba(255,255,255,0.45);font-size:11px;line-height:1.7;");
+        w.innerHTML = oppReady ? "⚓ Both ready — starting battle!" : "⚓ Ships locked in!<br><span style='font-size:9px;opacity:0.6;'>Waiting for opponent to finish placing…</span>";
+        main.appendChild(w); return;
+      }
+
+      let selectedShip = null, horizontal = true;
+      let currentGrid  = [...myGrid];
+      const placedSet  = new Set(currentGrid.filter(Boolean));
+
+      // status hint
+      const hint = mk("div","font-size:10px;color:rgba(0,200,255,0.8);text-align:center;font-weight:bold;");
+      hint.textContent = "Place your ships ⚓";
+      main.appendChild(hint);
+
+      // orientation button
+      const orientBtn = mkBtn("↔ Horizontal","gc-btn gc-sm gc-act","align-self:flex-start;");
+      orientBtn.onclick = () => { horizontal = !horizontal; orientBtn.textContent = horizontal ? "↔ Horizontal" : "↕ Vertical"; };
+      main.appendChild(orientBtn);
+
+      // ship list
+      const shipList = mk("div","display:flex;flex-direction:column;gap:2px;width:100%;max-width:220px;");
+      const shipEls  = {};
+      for (const s of Battleship.SHIPS) {
+        const done = placedSet.has(s.id);
+        const item = mk("div"); item.className = "bs-ship-item" + (done ? " bs-placed" : "");
+        const nm = mk("span","font-size:10px;color:#ccc;flex:1;min-width:70px;"); nm.textContent = s.name;
+        const dots = mk("span","display:flex;gap:2px;");
+        for (let i = 0; i < s.size; i++) {
+          const d = mk("span","width:10px;height:10px;border-radius:2px;background:rgba(60,100,180,0.85);display:inline-block;");
+          dots.appendChild(d);
+        }
+        item.append(nm, dots);
+        if (!done) item.onclick = () => {
+          selectedShip = s;
+          Object.values(shipEls).forEach(e => e.classList.remove("bs-selected"));
+          item.classList.add("bs-selected");
+        };
+        shipEls[s.id] = item;
+        shipList.appendChild(item);
+      }
+      main.appendChild(shipList);
+
+      // 10×10 placement grid
+      const gridEl = mk("div","display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:100%;max-width:220px;");
+
+      function rerender() {
+        gridEl.innerHTML = "";
+        for (let r = 0; r < 10; r++) {
+          for (let c = 0; c < 10; c++) {
+            const i  = Battleship.idx(r, c);
+            const cell = mk("div"); cell.className = "bs-cell";
+            cell.style.minHeight = "18px";
+            cell.classList.add(currentGrid[i] ? "ship" : "water");
+
+            cell.onmouseenter = () => {
+              if (!selectedShip || placedSet.has(selectedShip.id)) return;
+              const ok = Battleship.canPlace(currentGrid, r, c, selectedShip.size, horizontal);
+              for (let k = 0; k < selectedShip.size; k++) {
+                const pr = horizontal ? r : r + k, pc = horizontal ? c + k : c;
+                if (pr >= 0 && pr < 10 && pc >= 0 && pc < 10) {
+                  const pi = Battleship.idx(pr, pc);
+                  if (!currentGrid[pi]) gridEl.children[pi].className = "bs-cell " + (ok ? "preview" : "preview-bad");
+                  gridEl.children[pi].style.minHeight = "18px";
+                }
+              }
+            };
+            cell.onmouseleave = () => rerender();
+
+            cell.onclick = () => {
+              if (!selectedShip || placedSet.has(selectedShip.id)) return;
+              const ng = Battleship.placeShip(currentGrid, r, c, selectedShip.size, horizontal, selectedShip.id);
+              if (!ng) return;
+              currentGrid = ng;
+              placedSet.add(selectedShip.id);
+              shipEls[selectedShip.id].className = "bs-ship-item bs-placed";
+              selectedShip = null;
+              rerender();
+              readyBtn.style.display = Battleship.SHIPS.every(s => placedSet.has(s.id)) ? "block" : "none";
+            };
+            gridEl.appendChild(cell);
+          }
+        }
+      }
+      rerender();
+      main.appendChild(gridEl);
+
+      const readyBtn = mkBtn("Ready! ⚓","gc-btn gc-act","width:100%;max-width:220px;margin-top:6px;" + (Battleship.SHIPS.every(s => placedSet.has(s.id)) ? "" : "display:none;"));
+      readyBtn.onclick = async () => {
+        readyBtn.disabled = true; readyBtn.textContent = "Locking in…";
+        try {
+          await db.runTransaction(async tx => {
+            const snap = await tx.get(db.collection("gameRooms").doc(currentRoom.id));
+            if (!snap.exists) return;
+            const d = snap.data();
+            const upd = { [`${mySlot}Grid`]: currentGrid, [`${mySlot}Ready`]: true };
+            const oppR = mySlot === "p1" ? d.p2Ready : d.p1Ready;
+            if (oppR) upd.status = "playing";
+            tx.update(db.collection("gameRooms").doc(currentRoom.id), upd);
+          });
+        } catch(e) { console.error("bs ready:", e); readyBtn.disabled = false; readyBtn.textContent = "Ready! ⚓"; }
+      };
+      main.appendChild(readyBtn);
+    }
+
+    // ── Playing phase ────────────────────────────────────────────────────────
+    function renderPlaying(gd) {
+      main.innerHTML = "";
+      const mySlot     = myColor;
+      const pl         = gd.players || {};
+      const isMyTurn   = !isSpectator && gd.status === "playing" && gd.currentPlayer === mySlot;
+      const isFinished = gd.status === "finished";
+      const myGrid     = (mySlot === "p1" ? gd.p1Grid  : gd.p2Grid)  || Battleship.initGrid();
+      const myShots    = (mySlot === "p1" ? gd.p1Shots : gd.p2Shots) || Battleship.initGrid();
+      const incoming   = (mySlot === "p1" ? gd.p2Shots : gd.p1Shots) || Battleship.initGrid();
+
+      // status bar
+      const stEl = mk("div","font-size:10px;text-align:center;font-weight:bold;min-height:16px;");
+      if (isFinished) stEl.style.color = "#ffd";
+      else if (isMyTurn) { stEl.style.color = "rgba(0,220,255,0.95)"; stEl.textContent = "Your turn — fire!"; }
+      else { stEl.style.color = "rgba(255,255,255,0.38)"; stEl.textContent = isSpectator ? "" : "Opponent's turn…"; }
+      main.appendChild(stEl);
+
+      // Enemy grid
+      const enemyLbl = mk("div","font-size:9px;color:rgba(255,80,80,0.7);letter-spacing:1px;text-transform:uppercase;text-align:center;");
+      enemyLbl.textContent = "Enemy Waters";
+      main.appendChild(enemyLbl);
+
+      const enemyGrid = mk("div","display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:100%;max-width:220px;");
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+          const i  = Battleship.idx(r, c);
+          const shot = myShots[i];
+          const cell = mk("div"); cell.className = "bs-cell"; cell.style.minHeight = "18px";
+          if (shot === "hit")  { cell.classList.add("hit");  cell.textContent = "💥"; }
+          else if (shot === "miss") { cell.classList.add("miss"); cell.textContent = "·"; }
+          else {
+            cell.classList.add("water");
+            if (isMyTurn && !isFinished) {
+              cell.classList.add("target");
+              cell.onclick = () => handleFire(r, c, i, gd);
+            }
+          }
+          enemyGrid.appendChild(cell);
+        }
+      }
+      main.appendChild(enemyGrid);
+
+      // My fleet grid
+      const myLbl = mk("div","font-size:9px;color:rgba(0,180,255,0.65);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-top:4px;");
+      myLbl.textContent = isSpectator ? (pl[mySlot] || "P1") + "'s Fleet" : "Your Fleet";
+      main.appendChild(myLbl);
+
+      const myGridEl = mk("div","display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:100%;max-width:220px;");
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+          const i = Battleship.idx(r, c);
+          const cell = mk("div"); cell.className = "bs-cell"; cell.style.minHeight = "18px";
+          const inc = incoming[i];
+          if (inc === "hit")       { cell.classList.add("hit");  cell.textContent = "💥"; }
+          else if (inc === "miss") { cell.classList.add("miss"); cell.textContent = "·"; }
+          else if (myGrid[i] && !isSpectator) cell.classList.add("ship");
+          else cell.classList.add("water");
+          myGridEl.appendChild(cell);
+        }
+      }
+      main.appendChild(myGridEl);
+
+      if (isFinished && !gamesContent.querySelector(".bs-gameover-wrap"))
+        showBsGameOver(gd, pl);
+    }
+
+    // ── Fire ─────────────────────────────────────────────────────────────────
+    async function handleFire(r, c, i, gd) {
+      if (!myColor || isSpectator) return;
+      if (gd.status !== "playing" || gd.currentPlayer !== myColor) return;
+      const mySlot  = myColor;
+      const shots   = [...((mySlot === "p1" ? gd.p1Shots : gd.p2Shots) || Battleship.initGrid())];
+      if (shots[i]) return;
+      const oppGrid = (mySlot === "p1" ? gd.p2Grid : gd.p1Grid) || Battleship.initGrid();
+      shots[i] = oppGrid[i] ? "hit" : "miss";
+      const allGone = shots[i] === "hit" && Battleship.checkAllSunk(oppGrid, shots);
+      const upd = {
+        [`${mySlot}Shots`]: shots,
+        currentPlayer: allGone ? mySlot : (mySlot === "p1" ? "p2" : "p1"),
+      };
+      if (allGone) { upd.status = "finished"; upd.result = mySlot; }
+      try {
+        await db.collection("gameRooms").doc(currentRoom.id).update(upd);
+      } catch(e) { console.error("bs fire:", e); }
+    }
+
+    // ── Game over ─────────────────────────────────────────────────────────────
+    function showBsGameOver(gd, pl) {
+      const overlay = mk("div"); overlay.className = "bs-gameover-wrap";
+      const box = mk("div"); box.className = "bs-gameover-box";
+      const icon = mk("div","font-size:32px;margin-bottom:6px;");
+      const hl   = mk("div","font-size:14px;font-weight:bold;color:#5af;margin-bottom:4px;");
+      const sub  = mk("div","font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:12px;");
+      const winner = gd.result, user = getUser();
+      if (isSpectator) { icon.textContent = "🚢"; hl.textContent = (pl[winner]||winner) + " wins!"; }
+      else if (pl[winner] === user) { icon.textContent = "🏆"; hl.textContent = "You win!"; }
+      else { icon.textContent = "💀"; hl.textContent = "You lose!"; }
+      sub.textContent = (pl[winner]||winner) + (gd.resultReason === "forfeit" ? " wins (forfeit)" : " sank all ships!");
+      const closeBtn = mkBtn("Back to lobby","gc-btn gc-act","margin-top:4px;width:100%;");
+      closeBtn.onclick = () => { overlay.remove(); leaveRoom(); };
+      box.append(icon, hl, sub, closeBtn);
+      overlay.appendChild(box);
+      gamesContent.appendChild(overlay);
+    }
+
+    // ── Main update dispatcher ────────────────────────────────────────────────
+    function updateUI(gd) {
+      latestGd = gd;
+      const pl = gd.players || {};
+      if (gd.status === "waiting") {
+        main.innerHTML = "";
+        const w = mk("div","padding:20px;text-align:center;color:rgba(255,255,255,0.38);font-size:11px;");
+        w.textContent = "Waiting for opponent…"; main.appendChild(w);
+      } else if (gd.status === "placing") {
+        if (!isSpectator) renderPlacing(gd);
+        else {
+          main.innerHTML = "";
+          const w = mk("div","padding:20px;text-align:center;color:rgba(255,255,255,0.38);font-size:11px;line-height:1.7;");
+          w.innerHTML = `${gd.p1Ready ? "✓" : "⏳"} ${pl.p1||"P1"}&nbsp;&nbsp;|&nbsp;&nbsp;${gd.p2Ready ? "✓" : "⏳"} ${pl.p2||"P2"}<br><span style='font-size:9px;opacity:0.5;'>Placing ships…</span>`;
+          main.appendChild(w);
+        }
+      } else {
+        renderPlaying(gd);
+      }
+    }
+
+    updateUI(currentRoom);
+    unsubRoom = db.collection("gameRooms").doc(currentRoom.id).onSnapshot(
+      snap => { if (!snap.exists) { renderList(); return; } updateUI(snap.data()); },
+      e => console.error("battleship sub:", e)
+    );
+  }
   window.addEventListener("beforeunload", () => {
     if (!currentRoom || !db) return;
     const commitUrl = `https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents:commit?key=${FIREBASE_API_KEY}`;
@@ -3797,5 +4407,5 @@ if (currentRoom.visibility === 'private' && currentRoom.code) {
   });
 
   initFirebase();
-  console.log("CC Games tab loaded - Chess + Yahtzee + 8-Ball Pool");
+  console.log("CC Games tab loaded");
 })();
