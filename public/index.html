@@ -196,6 +196,7 @@
 
     .nav-links {
       display: flex;
+      align-items: center;
       gap: 28px;
       list-style: none;
     }
@@ -210,6 +211,32 @@
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--sun); }
+
+    /* ── GitHub nav button ── */
+    .nav-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.22);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: rgba(250,255,248,0.88) !important;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.15s;
+    }
+    .nav-github:hover {
+      background: rgba(255,255,255,0.18) !important;
+      border-color: rgba(255,255,255,0.45) !important;
+      color: #fff !important;
+      transform: translateY(-1px);
+    }
+    .nav-github svg { width:16px; height:16px; flex-shrink:0; }
 
     /* ══════════════════════════
        HERO
@@ -469,25 +496,25 @@
     }
 
     .feature-card {
-  background: rgba(0, 0, 0, 0.35);
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 16px;
-  padding: 28px 24px;
-  backdrop-filter: blur(10px);
-  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-  position: relative;
-  overflow: hidden;
-}
-.feature-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(255,255,255,0.3);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-.feature-card p {
-  font-size: 0.9rem;
-  color: rgba(250,255,248,0.88);
-  line-height: 1.6;
-}
+      background: rgba(0, 0, 0, 0.35);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 28px 24px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: rgba(250,255,248,0.88);
+      line-height: 1.6;
+    }
 
     .feature-icon {
       width: 52px;
@@ -634,14 +661,12 @@
       100% { background-position: -200% 0; }
     }
 
-    /* Download complete bar — green solid, no shimmer */
     .dl-progress-bar.complete {
       animation: none;
       background: linear-gradient(90deg, #3DA83C, #BCFFB8);
       transition: width 0.3s ease;
     }
 
-    /* Download complete label */
     .dl-complete-label {
       display: none;
       align-items: center;
@@ -718,6 +743,103 @@
     /* ══════════════════════════
        OPEN-SOURCE SECTION
     ══════════════════════════ */
+
+    /* ── GitHub Banner ── */
+    .github-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: rgba(0,0,0,0.35);
+      border: 2px solid rgba(255,255,255,0.14);
+      border-radius: 18px;
+      padding: 22px 28px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(10px);
+      flex-wrap: wrap;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .github-banner:hover {
+      border-color: rgba(255,255,255,0.28);
+      transform: translateY(-2px);
+    }
+    .github-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .github-banner-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.10);
+      border: 2px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .github-banner-icon svg {
+      width: 26px;
+      height: 26px;
+      fill: rgba(250,255,248,0.85);
+    }
+    .github-banner-text {}
+    .github-banner-text h4 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.05rem;
+      color: var(--white);
+      margin-bottom: 3px;
+    }
+    .github-banner-text p {
+      font-size: 0.82rem;
+      color: rgba(250,255,248,0.48);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.02em;
+    }
+    .github-banner-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .gh-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+    .gh-chip-star { background: rgba(255,216,77,0.15); color: var(--sun); border: 1px solid rgba(255,216,77,0.3); }
+    .gh-chip-open { background: rgba(92,200,91,0.15); color: #BCFFB8; border: 1px solid rgba(92,200,91,0.3); }
+    .gh-chip-js   { background: rgba(255,140,66,0.15); color: var(--orange); border: 1px solid rgba(255,140,66,0.3); }
+    .btn-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(255,255,255,0.10);
+      border: 2px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      color: var(--white);
+      text-decoration: none;
+      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .btn-github:hover {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.42);
+      transform: translateY(-2px);
+    }
+    .btn-github svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+
     .source-layout {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -997,6 +1119,7 @@
       .source-layout { grid-template-columns: 1fr; }
       .file-tree { height: 260px; }
       .code-panel { height: 480px; }
+      .github-banner { flex-direction: column; align-items: flex-start; }
     }
 
     /* ══════════════════════════
@@ -1095,6 +1218,14 @@
       <li><a href="#download">Download</a></li>
       <li><a href="#install">Install</a></li>
       <li><a href="#source">Open-Source</a></li>
+      <li>
+        <a href="https://github.com/8exlatent8-spec/OpenSource-Extension/tree/main/public" target="_blank" class="nav-github">
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+      </li>
     </ul>
   </nav>
 
@@ -1264,7 +1395,6 @@
             <div class="dl-progress-bar" id="dl-progress-bar"></div>
           </div>
 
-          <!-- Download Complete label -->
           <div class="dl-complete-label" id="dl-complete-label">
             ✅ Download Complete!
           </div>
@@ -1287,6 +1417,34 @@
       <div class="section-tag reveal">🔓 Open-Source</div>
       <h2 class="section-title reveal">Inspect the Code</h2>
       <p class="section-desc reveal">CCHelper is fully open-source. Click any file below to read it directly in your browser — no downloads required.</p>
+
+      <!-- ── GitHub Banner ── -->
+      <div class="github-banner reveal">
+        <div class="github-banner-left">
+          <div class="github-banner-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+          </div>
+          <div class="github-banner-text">
+            <h4>View on GitHub</h4>
+            <p>8exlatent8-spec / OpenSource-Extension</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div class="github-banner-chips">
+            <span class="gh-chip gh-chip-open">⬤ Open Source</span>
+            <span class="gh-chip gh-chip-js">JS</span>
+            <span class="gh-chip gh-chip-star">★ Free</span>
+          </div>
+          <a href="https://github.com/8exlatent8-spec/OpenSource-Extension/tree/main/public" target="_blank" class="btn-github">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            View Source
+          </a>
+        </div>
+      </div>
 
       <div class="source-layout reveal">
         <!-- File Tree -->
@@ -1420,9 +1578,15 @@
 
   <!-- FOOTER -->
   <footer style="text-align:center; padding: 40px 24px 48px; background: rgba(0,0,0,0.25); border-top: 2px solid rgba(255,255,255,0.08); color: rgba(250,255,248,0.5); font-size:0.85rem;">
-  <div style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:rgba(250,255,248,0.75); margin-bottom:8px;">CC <span style="color:var(--sun);">Helper</span></div>
-  <p>Fan-made tool for the Cubic Castles community. Not affiliated with Cosmic Cow LLC.</p>
-</footer>
+    <div style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:rgba(250,255,248,0.75); margin-bottom:8px;">CC <span style="color:var(--sun);">Helper</span></div>
+    <p>Fan-made tool for the Cubic Castles community. Not affiliated with Cosmic Cow LLC.</p>
+    <div style="margin-top:16px;">
+      <a href="https://github.com/8exlatent8-spec/OpenSource-Extension/tree/main/public" target="_blank" style="display:inline-flex;align-items:center;gap:8px;color:rgba(250,255,248,0.45);text-decoration:none;font-size:0.82rem;font-weight:700;transition:color 0.2s;" onmouseover="this.style.color='rgba(250,255,248,0.85)'" onmouseout="this.style.color='rgba(250,255,248,0.45)'">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        8exlatent8-spec / OpenSource-Extension
+      </a>
+    </div>
+  </footer>
 
   <script>
     /* ── REVEAL ON SCROLL ── */
@@ -1465,7 +1629,6 @@
       bar.style.width = '0%';
 
       let w = 0;
-      // Ramp up fast to ~85%, then slow — simulates real download
       const interval = setInterval(() => {
         if (w < 70)       w += Math.random() * 14 + 6;
         else if (w < 90)  w += Math.random() * 3 + 1;
@@ -1474,7 +1637,6 @@
         if (w >= 99) {
           w = 99;
           clearInterval(interval);
-          // Small pause at 99% then snap to 100% = "complete"
           setTimeout(() => {
             bar.classList.add('complete');
             bar.style.width = '100%';
@@ -1486,20 +1648,16 @@
     }
 
     document.getElementById('dl-btn').addEventListener('click', function () {
-      if (dlDone) return; // prevent double-fire
+      if (dlDone) return;
 
       showToast('Downloading CCHelper... 📦', '⬇️', 6000);
 
       animateProgress(() => {
         dlDone = true;
-        // Show the complete label
         const label = document.getElementById('dl-complete-label');
         label.classList.add('show');
-        // Update the download icon to a checkmark
         document.getElementById('dl-icon-wrap').textContent = '✅';
-        // Update toast
         showToast('Download complete! 🎉', '✅', 4000);
-        // Change button text
         const btn = document.getElementById('dl-btn');
         btn.innerHTML = `
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
@@ -1534,12 +1692,10 @@
 
     /* ══════════════════════════════════════════
        OPEN-SOURCE FILE VIEWER
-       Fetches real files from the CCHelper folder
     ══════════════════════════════════════════ */
     let currentCode = '';
 
     async function loadFile(path, name, type) {
-      // Mark active tree item
       document.querySelectorAll('.tree-file').forEach(f => f.classList.remove('active'));
       const clicked = [...document.querySelectorAll('.tree-file')].find(f => f.dataset.file === name);
       if (clicked) clicked.classList.add('active');
@@ -1547,22 +1703,19 @@
       document.getElementById('code-panel-filename').textContent = name;
       setState('loading');
 
-      // Set raw link
       const rawBtn = document.getElementById('raw-btn');
       rawBtn.href = path;
       rawBtn.style.display = 'inline-flex';
 
-      /* ── Image files ── */
       if (type === 'img') {
         document.getElementById('copy-btn').style.display = 'none';
         const img = document.getElementById('preview-img');
         img.onload  = () => setState('img');
         img.onerror = () => setState('error', path, 'Image not found at: ' + path);
-        img.src = path + '?v=' + Date.now(); // cache-bust
+        img.src = path + '?v=' + Date.now();
         return;
       }
 
-      /* ── Text / code files ── */
       document.getElementById('copy-btn').style.display = 'inline-flex';
 
       try {
@@ -1575,12 +1728,10 @@
         const text = await res.text();
         currentCode = text;
 
-        // Build line numbers
         const lines = text.split('\n');
         const lineNums = document.getElementById('line-numbers');
         lineNums.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
 
-        // Syntax highlight
         const highlighted = type === 'json'
           ? highlightJSON(escHtml(text))
           : highlightJS(escHtml(text));
